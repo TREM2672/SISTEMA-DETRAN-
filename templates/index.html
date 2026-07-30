@@ -1,0 +1,2080 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DETRAN — Prontuário Digital do CFC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy: #14508A;
+  --navy-2: #1B65AC;
+  --navy-deep: #0A2E52;
+  --govbar: #0A2E52;
+  --paper: #F3F6FA;
+  --paper-2: #E9EEF4;
+  --ochre: #F0A82E;
+  --ochre-dark: #C6820F;
+  --verde: #1E9B5E;
+  --ink: #16202E;
+  --ink-soft: #64738A;
+  --line: #DFE5EC;
+  --ok: #1E9B5E;
+  --ok-bg: #E4F6EC;
+  --pend: #D94F3D;
+  --pend-bg: #FBEAE7;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-pill: 999px;
+  --shadow-sm: 0 1px 2px rgba(16,38,66,0.06), 0 1px 1px rgba(16,38,66,0.04);
+  --shadow-md: 0 8px 24px rgba(16,38,66,0.08), 0 2px 6px rgba(16,38,66,0.04);
+  --shadow-lg: 0 16px 40px rgba(16,38,66,0.14);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(circle at 15% 0%, rgba(20,80,138,0.05), transparent 40%),
+    radial-gradient(circle at 100% 100%, rgba(240,168,46,0.05), transparent 45%),
+    var(--paper);
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---------- Barra de governo ---------- */
+.govbar{
+  background: var(--govbar);
+  color: #C9D2DE;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  padding: 7px 20px;
+  display:flex; align-items:center; gap:8px;
+}
+.govbar-sep{ opacity:.5; }
+.govbar-flag{
+  width:14px; height:10px; border-radius:1px; flex-shrink:0;
+  background: linear-gradient(180deg, #1E7A4C 0 33%, #E8AC1E 33% 66%, #0B3D63 66% 100%);
+}
+
+.app{display:flex; min-height: calc(100vh - 32px);}
+
+/* ---------- Sidebar ---------- */
+.sidebar{
+  width: 252px;
+  flex-shrink: 0;
+  background: linear-gradient(165deg, var(--navy) 0%, var(--navy-deep) 100%);
+  color: #E9E4D8;
+  padding: 30px 22px;
+  display:flex;
+  flex-direction:column;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  z-index: 2;
+}
+.brand{
+  display:flex; align-items:center; gap:13px;
+  padding-bottom:20px;
+  margin-bottom:22px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+.logo-mark{ width:44px; height:44px; flex-shrink:0; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.25)); }
+.logo-mark svg{ width:100%; height:100%; }
+.brand-text{ flex:1; display:flex; flex-direction:column; gap:3px; }
+.brand-word{
+  font-family:'Sora', sans-serif;
+  font-size: 19px;
+  font-weight:800;
+  letter-spacing:0.01em;
+  color:#fff;
+  line-height:1;
+}
+.brand .eyebrow{
+  font-family:'Inter', sans-serif;
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  color: #9FB3CC;
+  font-weight:500;
+}
+nav{display:flex; flex-direction:column; gap:6px;}
+.nav-btn{
+  all: unset;
+  cursor:pointer;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight:500;
+  color: #C9C4B4;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  transition: background .18s ease, color .18s ease, transform .12s ease;
+}
+.nav-btn svg{width:16px;height:16px; flex-shrink:0; opacity:.85;}
+.nav-btn:hover{ background: rgba(255,255,255,0.08); color:#fff; transform: translateX(2px); }
+.nav-btn.active{ background: var(--ochre); color: #1B1305; font-weight:700; box-shadow: 0 4px 14px rgba(240,168,46,0.35); }
+.nav-btn.active svg{opacity:1;}
+
+.sidebar-footer{
+  margin-top:auto;
+  padding-top:18px;
+  border-top: 1px solid rgba(233,228,216,0.18);
+  font-size:11px;
+  color: #8B93A8;
+  line-height:1.5;
+}
+.sidebar-footer strong{color:#C9C4B4;}
+.sidebar-protocolo{
+  margin-top:14px; padding-top:12px;
+  border-top: 1px dashed rgba(233,228,216,0.18);
+  font-family:'JetBrains Mono', monospace;
+  font-size:10px; letter-spacing:0.04em;
+  color:#5E6B82; line-height:1.6;
+}
+
+/* ---------- Main ---------- */
+main{flex:1; padding: 40px 44px 60px; max-width: 900px; margin: 0 auto; width:100%;}
+.screen{display:none;}
+.screen.active{display:block;}
+
+h1{
+  font-family:'Sora', sans-serif;
+  font-size: 28px;
+  font-weight:700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  margin:0 0 4px 0;
+}
+.subhead{
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  margin: 0 0 28px 0;
+}
+
+.card{
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 26px 28px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 2px rgba(16,38,66,0.05), 0 1px 0 rgba(16,38,66,0.03) inset;
+  transition: box-shadow .2s ease, border-color .2s ease;
+  position:relative;
+}
+.card:hover{ box-shadow: var(--shadow-md); border-color: #D2DAE3; }
+.card h2{
+  font-family:'Sora', sans-serif;
+  font-size:17px;
+  font-weight:700;
+  letter-spacing:-0.005em;
+  margin: 0 0 4px 0;
+  display:flex; align-items:center; gap:8px;
+}
+.card .card-note{ font-size:12.5px; color:var(--ink-soft); margin: 0 0 16px 0; line-height:1.5;}
+.card-header-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
+.card-header-row .card-note{ margin-bottom:0; }
+
+/* forms */
+.grid{ display:grid; grid-template-columns: 1fr 1fr; gap:14px 18px;}
+.field{ display:flex; flex-direction:column; gap:5px;}
+.field.full{ grid-column: 1 / -1; }
+label{ font-size:12px; font-weight:600; color: var(--ink-soft); text-transform:uppercase; letter-spacing:0.03em;}
+input, select{
+  font-family:'Inter', sans-serif;
+  font-size:14px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: var(--ink);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+input:focus, select:focus{
+  border-color: var(--navy-2);
+  box-shadow: 0 0 0 3px rgba(27,101,172,0.14);
+}
+button:focus-visible, .nav-btn:focus-visible{
+  outline: 2px solid var(--ochre);
+  outline-offset: 1px;
+}
+input[type=cpf], input[type=text]{ font-family:'JetBrains Mono', monospace; font-size:13.5px;}
+
+.form-erro{
+  display:none;
+  font-size:13px; font-weight:600; color: var(--pend);
+  background: var(--pend-bg);
+  padding: 10px 14px; border-radius: var(--radius-sm);
+  margin: 14px 0 0 0;
+}
+.form-erro.show{ display:block; }
+.field input.invalido, .field select.invalido{ border-color: var(--pend); background: #FDF4F3; }
+
+button.primary{
+  all:unset; cursor:pointer;
+  background: linear-gradient(180deg, var(--navy-2), var(--navy));
+  color: #fff;
+  padding: 12px 26px;
+  border-radius: var(--radius-pill);
+  font-size: 13.5px;
+  font-weight:700;
+  letter-spacing:0.01em;
+  margin-top: 18px;
+  display:inline-block;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.12) inset,
+    0 6px 16px rgba(10,46,82,0.32);
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+button.primary:hover{ transform: translateY(-1px); box-shadow: 0 1px 0 rgba(255,255,255,0.12) inset, 0 10px 22px rgba(10,46,82,0.4); filter: brightness(1.04); }
+button.primary:active{ transform: translateY(0); box-shadow: 0 2px 6px rgba(10,46,82,0.3) inset; }
+
+button.secondary{
+  all:unset; cursor:pointer;
+  border: 1.5px solid var(--line);
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 12.5px;
+  font-weight:600;
+  color: var(--ink);
+  background: linear-gradient(180deg, #fff, #FAFBFC);
+  box-shadow: 0 1px 2px rgba(16,38,66,0.04);
+  transition: border-color .15s ease, color .15s ease, box-shadow .15s ease, transform .1s ease;
+}
+button.secondary:hover{ border-color: var(--ochre); color:var(--ochre-dark); box-shadow: 0 2px 8px rgba(16,38,66,0.08); }
+button.secondary:active{ transform: translateY(1px); }
+
+button.perigo{
+  all:unset; cursor:pointer;
+  background: linear-gradient(180deg, #E15C49, var(--pend));
+  color: #fff;
+  padding: 12px 26px;
+  border-radius: var(--radius-pill);
+  font-size: 13.5px;
+  font-weight:700;
+  letter-spacing:0.01em;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.12) inset, 0 6px 16px rgba(217,79,61,0.32);
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+button.perigo:hover{ transform: translateY(-1px); filter: brightness(1.05); }
+button.perigo:active{ transform: translateY(0); }
+
+button.tiny{
+  all:unset; cursor:pointer;
+  font-size: 11.5px;
+  font-weight:700;
+  padding: 6px 13px;
+  border-radius: var(--radius-pill);
+  background: var(--paper-2);
+  color: var(--ink);
+  border: 1px solid transparent;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+button.tiny:hover{ background:#FFF3DE; color:var(--ochre-dark); border-color: rgba(240,168,46,0.4); }
+
+/* consulta: busca + lista */
+.search-row{ display:flex; gap:10px; margin-bottom:8px;}
+.search-feedback{ font-size:12.5px; color:var(--ink-soft); margin: 0 0 14px 2px; min-height:16px;}
+.search-feedback.encontrado{ color: var(--ok); font-weight:600;}
+.search-feedback.nao-encontrado{ color: var(--pend); font-weight:600;}
+.search-row input{ flex:1; }
+.lista-alunos{ display:flex; flex-direction:column; gap:8px;}
+.aluno-item{
+  display:flex; justify-content:space-between; align-items:center;
+  padding: 13px 16px;
+  border:1px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor:pointer;
+  background:#fff;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow .15s ease, transform .12s ease, border-color .15s ease;
+}
+.aluno-item:hover{ border-color: var(--navy-2); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.aluno-item .nome{ font-weight:600; font-size:14px;}
+.aluno-item .meta{ font-size:12px; color:var(--ink-soft); font-family:'JetBrains Mono', monospace;}
+.empty{
+  text-align:center; padding: 48px 20px; color: var(--ink-soft); font-size:14px;
+  border: 1.5px dashed var(--line); border-radius: var(--radius);
+}
+.empty.aguardando-busca{ background: #fff; }
+.empty.aguardando-busca svg{ width:30px; height:30px; opacity:.4; margin-bottom:10px; }
+.empty.aguardando-busca p{ margin:0; }
+
+.carregando-busca{
+  text-align:center; padding: 48px 20px; color: var(--ink-soft); font-size:14px;
+  border: 1.5px dashed var(--line); border-radius: var(--radius);
+  background:#fff;
+}
+.carregando-busca p{ margin: 14px 0 0 0; font-family:'JetBrains Mono', monospace; font-size:12.5px; }
+.spinner{
+  width:28px; height:28px; margin: 0 auto;
+  border: 3px solid var(--paper-2);
+  border-top-color: var(--navy-2);
+  border-radius:50%;
+  animation: girar .7s linear infinite;
+}
+@keyframes girar{ to{ transform: rotate(360deg); } }
+
+/* foto do aluno */
+.foto-upload-row{ display:flex; align-items:center; gap:18px; }
+.foto-preview{
+  width:120px; height:120px; border-radius: var(--radius-sm);
+  border: 1.5px dashed var(--line);
+  background: var(--paper-2);
+  display:flex; align-items:center; justify-content:center;
+  color: var(--ink-soft);
+  overflow:hidden; flex-shrink:0;
+  position:relative; cursor:pointer;
+}
+.foto-preview svg{ width:34px; height:34px; opacity:.6; }
+.foto-preview img{ width:100%; height:100%; object-fit:cover; }
+.foto-preview.tem-foto{ border-style: solid; border-color: var(--ochre); }
+
+.avatar-mini{
+  width:40px; height:40px; border-radius: var(--radius-sm);
+  background: var(--paper-2); color:var(--ink-soft);
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden; flex-shrink:0; font-family:'Sora', sans-serif; font-weight:600; font-size:14px;
+}
+.avatar-mini img{ width:100%; height:100%; object-fit:cover; }
+
+.avatar-grande{
+  width:150px; height:150px; border-radius: var(--radius);
+  background: var(--paper-2); color:var(--ink-soft);
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden; flex-shrink:0; border: 3px solid #fff; box-shadow: 0 0 0 1.5px var(--line), var(--shadow-md);
+  font-family:'Sora', sans-serif; font-weight:600; font-size:44px;
+  position:relative;
+}
+.avatar-grande img{ width:100%; height:100%; object-fit:cover; }
+.btn-ajustar-foto{
+  all:unset; cursor:pointer;
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:12.5px; font-weight:600; color: var(--navy-2);
+  margin-top:10px;
+}
+.btn-ajustar-foto:hover{ color: var(--ochre-dark); }
+.btn-ajustar-foto svg{ width:14px; height:14px; }
+.alerta-regularizacao{
+  display:flex; align-items:flex-start; gap:14px;
+  background: #FDECEA;
+  border: 1.5px solid #F1B3AB;
+  color: var(--pend);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 14px rgba(217,79,61,0.12);
+}
+.alerta-regularizacao svg{ width:22px; height:22px; flex-shrink:0; margin-top:1px; }
+.alerta-regularizacao strong{ display:block; font-size:14px; font-family:'Sora', sans-serif; color: #7A2A1F; margin-bottom:2px; }
+.alerta-regularizacao span{ font-size:12.5px; color: var(--pend); line-height:1.5; }
+
+.resultado-consulta{
+  display:flex; align-items:center; gap:12px;
+  background: var(--ok-bg); color: var(--ok);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-size: 13px;
+}
+.resultado-consulta svg{ width:20px; height:20px; flex-shrink:0; }
+.resultado-consulta strong{ display:block; font-size:13.5px; color: var(--ink); font-family:'Sora', sans-serif; }
+.resultado-consulta span{ font-family:'JetBrains Mono', monospace; font-size:11px; opacity:.85; }
+
+.detalhe-header{ display:flex; align-items:center; gap:18px; margin-bottom: 18px; }
+.detalhe-header .titulos{ flex:1; }
+.detalhe-header h1{ margin-bottom:6px; }
+.situacao-badge{
+  display:inline-block;
+  vertical-align: middle;
+  font-family:'Inter', sans-serif;
+  font-size: 12px; font-weight:700;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  margin-left: 10px;
+}
+
+/* editor de foto (modal) */
+.modal-overlay{
+  position:fixed; inset:0; background: rgba(10,20,35,0.55);
+  display:flex; align-items:center; justify-content:center;
+  z-index:100; padding:20px;
+}
+.modal-box{
+  background:#fff; border-radius: var(--radius);
+  padding: 26px; width: 100%; max-width: 380px;
+  box-shadow: var(--shadow-lg);
+}
+.modal-box h3{ font-family:'Sora', sans-serif; font-size:17px; font-weight:700; margin:0 0 4px 0; }
+.modal-box .card-note{ margin-bottom:16px; }
+.foto-editor-viewport{
+  width: 260px; height: 260px; margin: 0 auto 16px auto;
+  border-radius: var(--radius-sm);
+  overflow:hidden; position:relative;
+  background: var(--paper-2);
+  cursor: grab; touch-action:none;
+  border: 1.5px solid var(--line);
+}
+.foto-editor-viewport:active{ cursor: grabbing; }
+.foto-editor-viewport img{
+  position:absolute; top:50%; left:50%;
+  max-width:none;
+  transform-origin: center center;
+  user-select:none; pointer-events:none;
+}
+.foto-editor-zoom-row{ display:flex; align-items:center; gap:10px; margin-bottom:18px; }
+.foto-editor-zoom-row input[type=range]{ flex:1; }
+.modal-actions{ display:flex; justify-content:flex-end; gap:10px; }
+
+.situacao-regular{ background: var(--ok-bg); color: var(--ok); }
+.situacao-pendente{ background: #FBF0DC; color: var(--ochre-dark); }
+.situacao-irregular{ background: var(--pend-bg); color: var(--pend); }
+.foto-trocar{ margin-top:4px; }
+.foto-trocar input{ font-size:11.5px; }
+
+.card-perfil{ padding-bottom: 26px; }
+.card-perfil .dados-grid{ margin-bottom:0; box-shadow:none; }
+.dados-eyebrow{
+  display:block;
+  font-family:'Inter', sans-serif;
+  font-size: 11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase;
+  color: var(--ochre-dark);
+  margin-bottom: 14px;
+}
+.card-perfil-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; padding-bottom:14px; border-bottom: 1px solid var(--paper-2); }
+.card-perfil-top .dados-eyebrow{ margin-bottom:0; }
+.detran-uf-badge{
+  display:flex; align-items:center; gap:8px;
+  background: var(--paper); border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 5px 12px 5px 6px;
+}
+.detran-uf-badge svg{ width:24px; height:24px; }
+.detran-uf-badge span{
+  font-family:'Sora', sans-serif; font-size:12.5px; font-weight:700;
+  color: var(--navy-2); letter-spacing:0.01em;
+}
+
+.status-toggle{ display:flex; gap:10px; flex-wrap:wrap; }
+.status-btn{
+  all:unset; cursor:pointer;
+  display:flex; align-items:center; gap:8px;
+  padding: 11px 18px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--line);
+  font-size: 13.5px; font-weight:600;
+  color: var(--ink-soft);
+  background:#fff;
+  box-shadow: 0 1px 2px rgba(16,38,66,0.04);
+  transition: all .15s ease;
+}
+.status-dot{ width:8px; height:8px; border-radius:50%; background: currentColor; opacity:.5; }
+.status-btn:hover{ border-color: currentColor; box-shadow: 0 2px 8px rgba(16,38,66,0.08); transform: translateY(-1px); }
+.status-btn.status-regular{ color: var(--ok); }
+.status-btn.status-pendente{ color: var(--ochre-dark); }
+.status-btn.status-irregular{ color: var(--pend); }
+.status-btn.ativo{ color:#fff; border-color:transparent; box-shadow: var(--shadow-sm); }
+.status-btn.ativo .status-dot{ opacity:1; background:#fff; }
+.status-btn.status-regular.ativo{ background: var(--ok); }
+.status-btn.status-pendente.ativo{ background: var(--ochre-dark); }
+.status-btn.status-irregular.ativo{ background: var(--pend); }
+
+.dados-grid{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow:hidden;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+}
+.dado-item{
+  background:#fff;
+  padding: 19px 22px 19px 24px;
+  display:flex; flex-direction:column; gap:8px;
+  position:relative;
+  transition: background .15s ease;
+}
+.dado-item::before{
+  content:'';
+  position:absolute; left:0; top:0; bottom:0; width:3px;
+  background: var(--ochre);
+  opacity:0;
+  transition: opacity .15s ease;
+}
+.dado-item:hover{ background: var(--paper); }
+.dado-item:hover::before{ opacity:1; }
+.dado-item-full{ grid-column: 1 / -1; }
+.dado-filiacao{ display:flex; gap:40px; flex-wrap:wrap; }
+.dado-filiacao > div{ display:flex; flex-direction:column; gap:8px; flex:1; min-width:180px; }
+.dado-label{
+  font-family:'Inter', sans-serif;
+  font-size: 11.5px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase;
+  color: var(--navy-2);
+  opacity:.7;
+}
+.dado-valor{
+  font-family:'JetBrains Mono', monospace;
+  font-size: 29px;
+  font-weight:600;
+  color: var(--ink);
+  letter-spacing:0.02em;
+  line-height:1.2;
+  font-variant-numeric: tabular-nums;
+}
+.dado-valor-pequeno{
+  font-family:'Sora', sans-serif;
+  font-size:19px; font-weight:600; letter-spacing:-0.005em;
+  color: var(--ink);
+}
+@media (max-width: 760px){
+  .dados-grid{ grid-template-columns: repeat(2, 1fr); }
+}
+
+.consulta-central{ max-width: 520px; margin: 0 auto 28px auto; text-align:center; }
+.consulta-header{ display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:24px; }
+.consulta-icone{
+  width:56px; height:56px; border-radius: 50%; flex-shrink:0;
+  background: linear-gradient(135deg, var(--navy-2), var(--navy));
+  color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow: 0 8px 20px rgba(20,80,138,0.28);
+  margin-bottom:4px;
+}
+.consulta-icone svg{ width:24px; height:24px; }
+.consulta-header h1{ margin-bottom:2px; }
+.consulta-header .subhead{ max-width: 380px; }
+
+.search-bar-pro{
+  display:flex; align-items:center; gap:10px;
+  background:#fff;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 6px 8px 6px 20px;
+  box-shadow: var(--shadow-md);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.search-bar-pro:focus-within{ border-color: var(--navy-2); box-shadow: 0 0 0 4px rgba(27,101,172,0.12), var(--shadow-md); }
+.search-bar-pro svg{ width:18px; height:18px; color: var(--ink-soft); flex-shrink:0; }
+.search-bar-pro input{
+  flex:1; border:none; background:transparent; padding: 10px 0;
+  font-size:14.5px;
+}
+.search-bar-pro input:focus{ box-shadow:none; }
+.search-bar-pro button.primary{ margin-top:0; padding: 11px 24px; white-space:nowrap; }
+.search-feedback{ text-align:center; }
+
+.etapas-toolbar{ margin-bottom:14px; }
+.tabela-etapas td{ padding: 7px 8px; }
+.tabela-taxas td{ padding: 9px 8px; }
+.valor-taxa{ font-family:'JetBrains Mono', monospace; font-weight:600; }
+.tabela-etapas input[type=date]{ width: 130px; }
+.tabela-etapas input[type=text]{ width: 100%; min-width: 140px; }
+button.tiny.tag-ok-btn{ background: var(--ok-bg); color: var(--ok); }
+button.tiny.remover{ background: var(--pend-bg); color: var(--pend); font-weight:700; }
+button.tiny.remover:hover{ background: var(--pend); color: #fff; }
+
+/* selo de status (elemento assinatura) */
+.selo{
+  display:flex; align-items:center; gap:16px;
+  padding: 20px 22px;
+  border-radius: var(--radius);
+  background: #fff;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-md);
+  margin-bottom:20px;
+}
+.selo-badge{
+  width:64px; height:64px; border-radius:50%;
+  border: 2.5px solid currentColor;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+  position:relative;
+  transform: rotate(-8deg);
+}
+.selo-badge::before{
+  content:'';
+  position:absolute; inset:5px;
+  border-radius:50%;
+  border: 1px dashed currentColor;
+  opacity:.55;
+}
+.selo-badge span{
+  font-family:'Sora', sans-serif;
+  font-weight:700;
+  font-size: 10.5px;
+  letter-spacing:0.02em;
+  text-align:center;
+  line-height:1.15;
+}
+.selo.ok{ color: var(--ok); }
+.selo.pend{ color: var(--pend); }
+.selo-text strong{ display:block; font-size:15px; font-family:'Sora', sans-serif; margin-bottom:2px; color:var(--ink);}
+.selo-text span{ font-size:12.5px; color:var(--ink-soft);}
+
+/* tabelas internas */
+table{ width:100%; border-collapse:collapse; }
+th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.03em; color:var(--ink-soft); padding: 6px 8px; border-bottom:1px solid var(--line);}
+td{ padding:9px 8px; border-bottom:1px solid var(--paper-2); font-size:13.5px; vertical-align:middle;}
+tr:last-child td{ border-bottom:none;}
+
+.tag{
+  display:inline-block; padding:3px 9px; border-radius:20px;
+  font-size:11px; font-weight:600;
+}
+.tag.ok{ background:var(--ok-bg); color:var(--ok); }
+.tag.pend{ background:var(--pend-bg); color:var(--pend); }
+.tag.pendente-amarelo{ background: #FBF0DC; color: var(--ochre-dark); }
+
+.inline-form{ display:flex; gap:6px; align-items:center; flex-wrap:wrap;}
+.inline-form select, .inline-form input{ padding:6px 8px; font-size:12.5px;}
+.inline-form input[type=number]{ width:64px;}
+.inline-form input[type=text]{ width:110px;}
+
+.progress-row{ display:flex; justify-content:space-between; font-size:12px; color:var(--ink-soft); margin-bottom:6px;}
+.progress-bar{ height:6px; background:var(--paper-2); border-radius:4px; overflow:hidden; margin-bottom:14px;}
+.progress-bar > div{ height:100%; background: var(--ochre); }
+
+.toast{
+  position:fixed; bottom:24px; right:24px;
+  background: var(--navy); color:#fff;
+  padding:12px 18px; border-radius: var(--radius);
+  font-size:13px; font-weight:500;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+  opacity:0; transform: translateY(8px);
+  transition: opacity .2s ease, transform .2s ease;
+  pointer-events:none;
+  z-index: 50;
+}
+.toast.show{ opacity:1; transform:translateY(0); }
+
+.back-link{
+  all:unset; cursor:pointer; color:var(--ink-soft); font-size:13px; font-weight:600;
+  margin-bottom:16px; display:inline-flex; align-items:center; gap:6px;
+}
+.back-link:hover{ color:var(--ochre-dark); }
+
+/* zona de risco: ação destrutiva, mantida discreta pra não competir com o resto da tela */
+.zona-risco{ text-align:right; margin: -6px 2px 20px 2px; }
+.link-perigo{
+  all:unset; cursor:pointer; color:var(--ink-soft); font-size:12px;
+  opacity:.7;
+}
+.link-perigo:hover{ color:var(--pend); opacity:1; text-decoration:underline; }
+
+@media (max-width: 760px){
+  .app{flex-direction:column;}
+  .sidebar{width:100%; flex-direction:row; align-items:center; padding:16px 20px;}
+  .brand{border:none; padding:0; margin:0; margin-right:20px;}
+  .sidebar-footer{display:none;}
+  nav{flex-direction:row;}
+  main{padding:22px;}
+  .grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div class="govbar">
+  <span class="govbar-flag"></span>
+  DETRAN <span class="govbar-sep">·</span> Painel de gestão de prontuários do CFC
+</div>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 40 40" fill="none">
+          <defs>
+            <linearGradient id="logoGrad" x1="0" y1="0" x2="40" y2="40">
+              <stop offset="0" stop-color="#F0A82E"/>
+              <stop offset="1" stop-color="#D9860F"/>
+            </linearGradient>
+          </defs>
+          <rect width="40" height="40" rx="12" fill="url(#logoGrad)"/>
+          <circle cx="20" cy="20" r="10" stroke="#fff" stroke-width="2.3" fill="none"/>
+          <circle cx="20" cy="20" r="2.6" fill="#fff"/>
+          <path d="M20 8.5 V13 M20 27 V31.5 M8.5 20 H13 M27 20 H31.5" stroke="#fff" stroke-width="2.3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-word">DETRAN</span>
+        <span class="eyebrow">Prontuário Digital · Gestão CFC</span>
+      </div>
+    </div>
+    <nav>
+      <button class="nav-btn active" data-screen="novo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Novo prontuário
+      </button>
+      <button class="nav-btn" data-screen="consulta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        Consulta interna (CPF)
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      Base normativa: <strong>Resolução CONTRAN 1.020/2025</strong><br>
+      2h de prática mínima · sem carga teórica mínima
+      <div class="sidebar-protocolo">PRE — Processo Eletrônico<br>de Registro do Condutor</div>
+    </div>
+  </aside>
+
+  <main>
+
+    <!-- ===================== TELA: NOVO PRONTUÁRIO ===================== -->
+    <section class="screen active" id="screen-novo">
+      <h1>Novo prontuário</h1>
+      <p class="subhead">Matricule um aluno e o sistema já monta o checklist de documentos e exames exigidos para o tipo de processo.</p>
+
+      <div class="card">
+        <h2>Fotografia do aluno</h2>
+        <p class="card-note">Usada para identificação no prontuário. Formatos aceitos: JPG, PNG.</p>
+        <div class="foto-upload-row">
+          <div class="foto-preview" id="foto-preview">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6"/></svg>
+          </div>
+          <div>
+            <input type="file" id="f-foto" accept="image/*">
+            <p class="card-note" style="margin:6px 0 0 0;">Opcional — pode adicionar depois pela tela de consulta.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header-row">
+          <div>
+            <h2>Dados do aluno</h2>
+            <p class="card-note">Campos com * são obrigatórios.</p>
+          </div>
+          <button class="secondary" type="button" id="btn-dados-teste">🎲 Preencher com dados de teste</button>
+        </div>
+        <form id="form-novo-aluno" novalidate>
+          <div class="grid">
+            <div class="field full">
+              <label for="f-nome">Nome completo *</label>
+              <input id="f-nome">
+            </div>
+            <div class="field">
+              <label for="f-cpf">CPF *</label>
+              <input id="f-cpf" placeholder="somente números">
+            </div>
+            <div class="field">
+              <label for="f-rg">RG *</label>
+              <input id="f-rg">
+            </div>
+            <div class="field">
+              <label for="f-nasc">Data de nascimento *</label>
+              <input id="f-nasc" type="date">
+            </div>
+            <div class="field">
+              <label for="f-sexo">Sexo</label>
+              <select id="f-sexo">
+                <option value="">Não informado</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Feminino">Feminino</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="f-nacionalidade">Nacionalidade</label>
+              <input id="f-nacionalidade" placeholder="ex.: Brasileira" value="Brasileira">
+            </div>
+            <div class="field">
+              <label for="f-naturalidade">Naturalidade (cidade)</label>
+              <input id="f-naturalidade" placeholder="cidade de nascimento">
+            </div>
+            <div class="field">
+              <label for="f-naturalidade-uf">UF de nascimento</label>
+              <select id="f-naturalidade-uf">
+                <option value="">—</option>
+                <option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option>
+                <option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option>
+                <option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option>
+                <option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+                <option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option>
+                <option>SE</option><option>TO</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="f-num-registro">Número de registro</label>
+              <input id="f-num-registro" placeholder="registro interno do prontuário">
+            </div>
+            <div class="field">
+              <label for="f-renach">Número do RENACH</label>
+              <input id="f-renach" placeholder="ex.: 123456789012">
+            </div>
+            <div class="field">
+              <label for="f-cat">Categoria pretendida</label>
+              <select id="f-cat">
+                <option>A</option><option selected>B</option><option>AB</option>
+                <option>C</option><option>D</option><option>E</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="f-mae">Nome da mãe</label>
+              <input id="f-mae">
+            </div>
+            <div class="field">
+              <label for="f-pai">Nome do pai</label>
+              <input id="f-pai">
+            </div>
+            <div class="field full">
+              <label for="f-proc">Tipo de processo</label>
+              <select id="f-proc">
+                <option value="primeira_habilitacao">Primeira habilitação</option>
+                <option value="adicao_categoria">Adição de categoria</option>
+                <option value="mudanca_categoria">Mudança de categoria</option>
+                <option value="renovacao">Renovação</option>
+                <option value="reciclagem">Reciclagem</option>
+              </select>
+            </div>
+          </div>
+          <p class="form-erro" id="form-erro"></p>
+          <button class="primary" type="submit">Matricular e abrir prontuário</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ===================== TELA: CONSULTA INTERNA ===================== -->
+    <section class="screen" id="screen-consulta">
+
+      <div id="consulta-lista-view">
+        <div class="consulta-central">
+          <div class="consulta-header">
+            <div class="consulta-icone" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            </div>
+            <h1>Consulta interna</h1>
+            <p class="subhead" style="margin-bottom:0;">Digite o CPF do aluno para localizar o prontuário completo cadastrado no sistema do CFC.</p>
+          </div>
+
+          <div class="search-bar-pro">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <input id="busca-aluno" type="text" placeholder="Digite o CPF do aluno (ou o nome)...">
+            <button class="primary" id="btn-buscar-cpf" type="button">Consultar</button>
+          </div>
+          <p class="search-feedback" id="search-feedback"></p>
+        </div>
+
+        <div id="lista-alunos" class="lista-alunos"></div>
+      </div>
+
+      <div id="consulta-detalhe-view" style="display:none;">
+        <button class="back-link" id="btn-voltar-lista">← Voltar à lista</button>
+        <div id="detalhe-conteudo"></div>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="foto-editor-overlay" style="display:none;">
+  <div class="modal-box">
+    <h3>Ajustar foto</h3>
+    <p class="card-note">Arraste pra reposicionar e use o zoom pra enquadrar o rosto.</p>
+    <div class="foto-editor-viewport" id="foto-editor-viewport">
+      <img id="foto-editor-img" alt="">
+    </div>
+    <div class="foto-editor-zoom-row">
+      <span style="font-size:16px;">－</span>
+      <input type="range" id="foto-editor-zoom" min="100" max="300" value="100">
+      <span style="font-size:16px;">＋</span>
+    </div>
+    <div class="modal-actions">
+      <button class="secondary" type="button" onclick="fecharEditorFoto()">Cancelar</button>
+      <button class="primary" type="button" onclick="salvarFotoEditada()">Salvar foto</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="confirmar-exclusao-overlay" style="display:none;">
+  <div class="modal-box">
+    <h3>Excluir prontuário</h3>
+    <p class="card-note" id="confirmar-exclusao-texto"></p>
+    <div class="modal-actions">
+      <button class="secondary" type="button" onclick="fecharConfirmarExclusao()">Cancelar</button>
+      <button class="perigo" type="button" id="confirmar-exclusao-btn">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* Captura qualquer erro inesperado do script e avisa na tela em vez de
+   falhar silenciosamente (evita a sensação de "o botão não faz nada"). */
+window.addEventListener('error', function(ev){
+  console.error('Erro no sistema de prontuário:', ev.error || ev.message);
+  var box = document.getElementById('form-erro');
+  if (box){
+    box.textContent = 'Ocorreu um erro inesperado no sistema. Recarregue a página e tente novamente.';
+    box.classList.add('show');
+  }
+});
+
+/* ============================================================
+   REGRAS DE VALIDAÇÃO — Resolução CONTRAN nº 1.020/2025
+   (mesma lógica do backend, espelhada em JS)
+   ============================================================ */
+const REGRAS = {
+  documentosPadrao: ['rg', 'cpf', 'comprovante_residencia'],
+  documentosExtrasPorProcesso: {
+    primeira_habilitacao: [],
+    adicao_categoria: ['crlv'],
+    mudanca_categoria: ['crlv'],
+    renovacao: [],
+    reciclagem: [],
+  },
+  examesObrigatorios: ['medico', 'psicotecnico', 'teorico', 'pratico'],
+  cargaTeoricaMinimaMin: 0,      // sem mínimo nacional (Res. 1.020/2025)
+  cargaPraticaMinimaMin: 120,    // 2h — 1ª habilitação categorias A/B
+};
+
+const LABELS = {
+  rg: 'RG', cpf: 'CPF', comprovante_residencia: 'Comprovante de residência', crlv: 'CRLV',
+  medico: 'Exame médico', psicotecnico: 'Exame psicotécnico', teorico: 'Exame teórico', pratico: 'Exame prático de direção',
+  primeira_habilitacao: 'Primeira habilitação', adicao_categoria: 'Adição de categoria',
+  mudanca_categoria: 'Mudança de categoria', renovacao: 'Renovação', reciclagem: 'Reciclagem',
+};
+
+function documentosExigidos(tipoProcesso){
+  return [...REGRAS.documentosPadrao, ...(REGRAS.documentosExtrasPorProcesso[tipoProcesso] || [])];
+}
+
+/* ============================================================
+   ETAPAS DO PRONTUÁRIO (exames, cursos e aulas) — checklist completo
+   ============================================================ */
+const ETAPAS_COMUNS = [
+  { tipo: 'exame_medico', nome: 'Exame médico / aptidão física e mental' },
+  { tipo: 'avaliacao_psicologica', nome: 'Avaliação psicológica' },
+  { tipo: 'curso_legislacao', nome: 'Curso teórico — Legislação de trânsito' },
+  { tipo: 'curso_direcao_defensiva', nome: 'Curso teórico — Direção defensiva' },
+  { tipo: 'curso_primeiros_socorros', nome: 'Curso teórico — Primeiros socorros' },
+  { tipo: 'curso_meio_ambiente', nome: 'Curso teórico — Meio ambiente e cidadania' },
+  { tipo: 'curso_mecanica_basica', nome: 'Curso teórico — Mecânica básica' },
+  { tipo: 'prova_teorica', nome: 'Prova teórica (informatizada)' },
+];
+const ETAPAS_MOTO = [
+  { tipo: 'aulas_praticas_moto', nome: 'Aulas práticas de direção — Motocicleta' },
+  { tipo: 'exame_pratico_moto', nome: 'Exame prático de direção — Motocicleta' },
+];
+const ETAPAS_VEICULO = [
+  { tipo: 'aulas_praticas_veiculo', nome: 'Aulas práticas de direção — Veículo' },
+  { tipo: 'exame_pratico_veiculo', nome: 'Exame prático de direção — Veículo' },
+];
+
+function etapasPorCategoria(categoria){
+  if (categoria === 'A') return [...ETAPAS_COMUNS, ...ETAPAS_MOTO];
+  if (categoria === 'B') return [...ETAPAS_COMUNS, ...ETAPAS_VEICULO];
+  if (categoria === 'AB') return [...ETAPAS_COMUNS, ...ETAPAS_MOTO, ...ETAPAS_VEICULO];
+  // C, D, E — categorias que exigem veículo (caminhão, ônibus, etc.)
+  return [...ETAPAS_COMUNS, ...ETAPAS_VEICULO];
+}
+
+function gerarEtapasIniciais(categoria){
+  return etapasPorCategoria(categoria).map(e => ({
+    id: 'et_' + e.tipo + '_' + Math.random().toString(36).slice(2, 8),
+    tipo: e.tipo,
+    nome: e.nome,
+    data: '',
+    observacao: '',
+    concluido: false,
+  }));
+}
+
+
+function validarProntuario(aluno){
+  const docsExigidos = documentosExigidos(aluno.tipoProcesso);
+  const docsFaltantes = docsExigidos.filter(tipo => !aluno.documentos.find(d => d.tipo === tipo && d.apresentado));
+  const docsOk = docsFaltantes.length === 0;
+
+  const examesPendencias = REGRAS.examesObrigatorios.filter(tipo => {
+    const ex = aluno.exames.find(e => e.tipo === tipo);
+    if (!ex || !ex.resultado) return true;
+    return !['apto', 'aprovado'].includes(ex.resultado);
+  });
+  const examesOk = examesPendencias.length === 0;
+
+  const totalTeorica = aluno.aulasTeoricas.reduce((s, a) => s + Number(a.duracao || 0), 0);
+  const teoricaOk = totalTeorica >= REGRAS.cargaTeoricaMinimaMin;
+
+  const totalPratica = aluno.aulasPraticas.reduce((s, a) => s + Number(a.duracao || 0), 0);
+  const praticaOk = totalPratica >= REGRAS.cargaPraticaMinimaMin;
+
+  const medicoApto = aluno.exames.find(e => e.tipo === 'medico')?.resultado === 'apto';
+  const psicoApto = aluno.exames.find(e => e.tipo === 'psicotecnico')?.resultado === 'apto';
+  const aptoExamePratico = docsOk && praticaOk && medicoApto && psicoApto;
+
+  return {
+    docsOk, docsFaltantes,
+    examesOk, examesPendencias,
+    teoricaOk, totalTeorica,
+    praticaOk, totalPratica,
+    completo: docsOk && examesOk && teoricaOk && praticaOk,
+    aptoExamePratico,
+  };
+}
+
+/* ============================================================
+   PERSISTÊNCIA — API do backend (Flask + SQLite)
+   Os dados agora ficam salvos no servidor (arquivo dados.db),
+   não mais apenas no navegador.
+   ============================================================ */
+let state = { alunos: [] };
+let alunoSelecionadoId = null;
+
+async function carregarDados(){
+  try{
+    const res = await fetch('/api/dados');
+    if (!res.ok) throw new Error('Falha ao carregar dados do servidor.');
+    const json = await res.json();
+    state.alunos = json.alunos || [];
+  } catch(e){
+    console.error(e);
+    state.alunos = [];
+    mostrarToast('Não foi possível carregar os dados do servidor.');
+  }
+}
+async function salvarDados(){
+  try{
+    const res = await fetch('/api/dados', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ alunos: state.alunos }),
+    });
+    if (!res.ok) throw new Error('Falha ao salvar dados no servidor.');
+  } catch(e){
+    console.error(e);
+    mostrarToast('Não foi possível salvar os dados no servidor.');
+  }
+}
+
+/* ============================================================
+   NAVEGAÇÃO ENTRE TELAS
+   ============================================================ */
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + btn.dataset.screen).classList.add('active');
+    if (btn.dataset.screen === 'consulta'){
+      document.getElementById('busca-aluno').value = '';
+      document.getElementById('search-feedback').textContent = '';
+      document.getElementById('search-feedback').className = 'search-feedback';
+      mostrarListaConsulta();
+      renderListaAlunos();
+    }
+  });
+});
+
+function mostrarToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+/* ============================================================
+   TELA: NOVO PRONTUÁRIO
+   ============================================================ */
+let fotoSelecionadaBase64 = null;
+
+/* ============================================================
+   EDITOR DE FOTO — arrastar para reposicionar + zoom.
+   Recorta sempre em quadrado (400x400) e devolve um novo base64.
+   ============================================================ */
+const FOTO_EDITOR_TAMANHO = 260; // tamanho do viewport visível (px)
+const FOTO_SAIDA_TAMANHO = 420;  // resolução da imagem final salva (px)
+let fotoEditorState = null; // { imgNatW, imgNatH, scaleBase, scale, offsetX, offsetY, onSave }
+let fotoEditorArrastando = false;
+let fotoEditorInicio = { x: 0, y: 0, offsetX: 0, offsetY: 0 };
+
+function abrirEditorFoto(srcBase64, onSave){
+  const overlay = document.getElementById('foto-editor-overlay');
+  const img = document.getElementById('foto-editor-img');
+  const zoom = document.getElementById('foto-editor-zoom');
+
+  img.onload = () => {
+    const escalaCobertura = Math.max(
+      FOTO_EDITOR_TAMANHO / img.naturalWidth,
+      FOTO_EDITOR_TAMANHO / img.naturalHeight
+    );
+    fotoEditorState = {
+      imgNatW: img.naturalWidth,
+      imgNatH: img.naturalHeight,
+      scaleBase: escalaCobertura,
+      scale: 1,
+      offsetX: 0,
+      offsetY: 0,
+      onSave,
+    };
+    zoom.value = 100;
+    aplicarTransformFotoEditor();
+  };
+  img.src = srcBase64;
+  overlay.style.display = 'flex';
+}
+
+function fecharEditorFoto(){
+  document.getElementById('foto-editor-overlay').style.display = 'none';
+  fotoEditorState = null;
+}
+
+function aplicarTransformFotoEditor(){
+  if (!fotoEditorState) return;
+  const img = document.getElementById('foto-editor-img');
+  const escalaFinal = fotoEditorState.scaleBase * fotoEditorState.scale;
+  img.style.width = (fotoEditorState.imgNatW * escalaFinal) + 'px';
+  img.style.height = (fotoEditorState.imgNatH * escalaFinal) + 'px';
+  img.style.transform =
+    `translate(-50%, -50%) translate(${fotoEditorState.offsetX}px, ${fotoEditorState.offsetY}px)`;
+}
+
+function limitarArrastoFotoEditor(){
+  if (!fotoEditorState) return;
+  const escalaFinal = fotoEditorState.scaleBase * fotoEditorState.scale;
+  const largura = fotoEditorState.imgNatW * escalaFinal;
+  const altura = fotoEditorState.imgNatH * escalaFinal;
+  const limiteX = Math.max(0, (largura - FOTO_EDITOR_TAMANHO) / 2);
+  const limiteY = Math.max(0, (altura - FOTO_EDITOR_TAMANHO) / 2);
+  fotoEditorState.offsetX = Math.min(limiteX, Math.max(-limiteX, fotoEditorState.offsetX));
+  fotoEditorState.offsetY = Math.min(limiteY, Math.max(-limiteY, fotoEditorState.offsetY));
+}
+
+function posicaoEvento(e){
+  if (e.touches && e.touches[0]) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  return { x: e.clientX, y: e.clientY };
+}
+
+function iniciarArrastoFotoEditor(e){
+  if (!fotoEditorState) return;
+  fotoEditorArrastando = true;
+  const p = posicaoEvento(e);
+  fotoEditorInicio = { x: p.x, y: p.y, offsetX: fotoEditorState.offsetX, offsetY: fotoEditorState.offsetY };
+}
+function moverArrastoFotoEditor(e){
+  if (!fotoEditorArrastando || !fotoEditorState) return;
+  e.preventDefault();
+  const p = posicaoEvento(e);
+  fotoEditorState.offsetX = fotoEditorInicio.offsetX + (p.x - fotoEditorInicio.x);
+  fotoEditorState.offsetY = fotoEditorInicio.offsetY + (p.y - fotoEditorInicio.y);
+  limitarArrastoFotoEditor();
+  aplicarTransformFotoEditor();
+}
+function pararArrastoFotoEditor(){
+  fotoEditorArrastando = false;
+}
+
+function salvarFotoEditada(){
+  if (!fotoEditorState) return;
+  const img = document.getElementById('foto-editor-img');
+  const escalaFinal = fotoEditorState.scaleBase * fotoEditorState.scale;
+
+  // Área (em pixels da imagem original) que está visível dentro do viewport quadrado
+  const larguraVisivelOriginal = FOTO_EDITOR_TAMANHO / escalaFinal;
+  const alturaVisivelOriginal = FOTO_EDITOR_TAMANHO / escalaFinal;
+  const centroXOriginal = fotoEditorState.imgNatW / 2 - fotoEditorState.offsetX / escalaFinal;
+  const centroYOriginal = fotoEditorState.imgNatH / 2 - fotoEditorState.offsetY / escalaFinal;
+  const sx = centroXOriginal - larguraVisivelOriginal / 2;
+  const sy = centroYOriginal - alturaVisivelOriginal / 2;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = FOTO_SAIDA_TAMANHO;
+  canvas.height = FOTO_SAIDA_TAMANHO;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, sx, sy, larguraVisivelOriginal, alturaVisivelOriginal, 0, 0, FOTO_SAIDA_TAMANHO, FOTO_SAIDA_TAMANHO);
+
+  const resultado = canvas.toDataURL('image/jpeg', 0.92);
+  const callback = fotoEditorState.onSave;
+  fecharEditorFoto();
+  if (callback) callback(resultado);
+}
+
+document.getElementById('foto-editor-zoom').addEventListener('input', (e) => {
+  if (!fotoEditorState) return;
+  fotoEditorState.scale = Number(e.target.value) / 100;
+  limitarArrastoFotoEditor();
+  aplicarTransformFotoEditor();
+});
+
+const fotoEditorViewportEl = document.getElementById('foto-editor-viewport');
+fotoEditorViewportEl.addEventListener('mousedown', iniciarArrastoFotoEditor);
+window.addEventListener('mousemove', moverArrastoFotoEditor);
+window.addEventListener('mouseup', pararArrastoFotoEditor);
+fotoEditorViewportEl.addEventListener('touchstart', iniciarArrastoFotoEditor, { passive: true });
+window.addEventListener('touchmove', moverArrastoFotoEditor, { passive: false });
+window.addEventListener('touchend', pararArrastoFotoEditor);
+
+/* ============================================================
+   DADOS DE TESTE — preenchimento aleatório fictício (só para testar
+   o sistema; nenhum dado real de pessoa alguma).
+   ============================================================ */
+const NOMES_TESTE = ['Ana', 'Bruno', 'Carla', 'Daniel', 'Eduarda', 'Felipe', 'Gabriela', 'Henrique', 'Isabela', 'João', 'Larissa', 'Marcos', 'Natália', 'Otávio', 'Patrícia', 'Rafael', 'Sabrina', 'Thiago', 'Vanessa', 'William'];
+const SOBRENOMES_TESTE = ['Silva', 'Santos', 'Oliveira', 'Souza', 'Rodrigues', 'Ferreira', 'Alves', 'Pereira', 'Lima', 'Gomes', 'Costa', 'Ribeiro', 'Martins', 'Carvalho', 'Almeida'];
+const CIDADES_TESTE = ['Goiânia', 'Anápolis', 'Aparecida de Goiânia', 'Águas Lindas de Goiás', 'Rio Verde', 'Luziânia', 'Formosa', 'Catalão'];
+
+function nomeAleatorioTeste(){
+  const nome = NOMES_TESTE[Math.floor(Math.random() * NOMES_TESTE.length)];
+  const sobrenome1 = SOBRENOMES_TESTE[Math.floor(Math.random() * SOBRENOMES_TESTE.length)];
+  const sobrenome2 = SOBRENOMES_TESTE[Math.floor(Math.random() * SOBRENOMES_TESTE.length)];
+  return `${nome} ${sobrenome1} ${sobrenome2}`;
+}
+function digitosAleatorios(qtd){
+  let s = '';
+  for (let i = 0; i < qtd; i++) s += Math.floor(Math.random() * 10);
+  return s;
+}
+function dataNascimentoAleatoriaTeste(){
+  const ano = 1975 + Math.floor(Math.random() * 33); // 1975–2007
+  const mes = String(1 + Math.floor(Math.random() * 12)).padStart(2, '0');
+  const dia = String(1 + Math.floor(Math.random() * 28)).padStart(2, '0');
+  return `${ano}-${mes}-${dia}`;
+}
+
+function preencherDadosTeste(){
+  document.getElementById('f-nome').value = nomeAleatorioTeste();
+  document.getElementById('f-cpf').value = digitosAleatorios(11);
+  document.getElementById('f-rg').value = digitosAleatorios(9);
+  document.getElementById('f-nasc').value = dataNascimentoAleatoriaTeste();
+  document.getElementById('f-renach').value = digitosAleatorios(12);
+  document.getElementById('f-mae').value = nomeAleatorioTeste();
+  document.getElementById('f-pai').value = nomeAleatorioTeste();
+  document.getElementById('f-sexo').selectedIndex = 1 + Math.floor(Math.random() * 2);
+  document.getElementById('f-nacionalidade').value = 'Brasileira';
+  document.getElementById('f-naturalidade').value = CIDADES_TESTE[Math.floor(Math.random() * CIDADES_TESTE.length)];
+  const selectUF = document.getElementById('f-naturalidade-uf');
+  selectUF.selectedIndex = 1 + Math.floor(Math.random() * (selectUF.options.length - 1));
+  document.getElementById('f-num-registro').value = digitosAleatorios(8);
+
+  const selectCat = document.getElementById('f-cat');
+  selectCat.selectedIndex = Math.floor(Math.random() * selectCat.options.length);
+
+  const selectProc = document.getElementById('f-proc');
+  selectProc.selectedIndex = Math.floor(Math.random() * selectProc.options.length);
+
+  ['f-nome', 'f-cpf', 'f-rg', 'f-nasc'].forEach(id => document.getElementById(id).classList.remove('invalido'));
+  const erroBox = document.getElementById('form-erro');
+  erroBox.classList.remove('show');
+
+  mostrarToast('Formulário preenchido com dados fictícios de teste.');
+}
+
+document.getElementById('btn-dados-teste').addEventListener('click', preencherDadosTeste);
+
+document.getElementById('f-foto').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    abrirEditorFoto(ev.target.result, (fotoRecortada) => {
+      fotoSelecionadaBase64 = fotoRecortada;
+      atualizarPreviewFotoFormulario();
+    });
+  };
+  reader.readAsDataURL(file);
+});
+
+function atualizarPreviewFotoFormulario(){
+  const preview = document.getElementById('foto-preview');
+  if (fotoSelecionadaBase64){
+    preview.classList.add('tem-foto');
+    preview.innerHTML = `<img src="${fotoSelecionadaBase64}" alt="Prévia da foto">`;
+  } else {
+    preview.classList.remove('tem-foto');
+    preview.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6"/></svg>`;
+  }
+}
+
+document.getElementById('foto-preview').addEventListener('click', () => {
+  if (fotoSelecionadaBase64){
+    abrirEditorFoto(fotoSelecionadaBase64, (fotoRecortada) => {
+      fotoSelecionadaBase64 = fotoRecortada;
+      atualizarPreviewFotoFormulario();
+    });
+  } else {
+    document.getElementById('f-foto').click();
+  }
+});
+
+document.getElementById('form-novo-aluno').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const erroBox = document.getElementById('form-erro');
+  ['f-nome', 'f-cpf', 'f-rg', 'f-nasc'].forEach(id => document.getElementById(id).classList.remove('invalido'));
+
+  const nomeInput = document.getElementById('f-nome');
+  const cpfInput = document.getElementById('f-cpf');
+  const rgInput = document.getElementById('f-rg');
+  const nascInput = document.getElementById('f-nasc');
+
+  const nome = nomeInput.value.trim();
+  const cpf = cpfInput.value.replace(/\D/g, '');
+  const rg = rgInput.value.trim();
+  const nasc = nascInput.value;
+
+  // validação manual (o form usa novalidate para não depender da bolha nativa do navegador,
+  // que em alguns casos fica escondida e dá a impressão de que o botão "não faz nada")
+  const faltando = [];
+  if (!nome) faltando.push(nomeInput);
+  if (cpf.length !== 11) faltando.push(cpfInput);
+  if (!rg) faltando.push(rgInput);
+  if (!nasc) faltando.push(nascInput);
+
+  if (faltando.length > 0){
+    faltando.forEach(input => input.classList.add('invalido'));
+    erroBox.textContent = cpf.length > 0 && cpf.length !== 11 && !faltando.includes(nomeInput) && !faltando.includes(rgInput) && !faltando.includes(nascInput)
+      ? 'CPF inválido: deve ter 11 dígitos.'
+      : 'Preencha os campos destacados em vermelho antes de matricular.';
+    erroBox.classList.add('show');
+    faltando[0].focus();
+    return;
+  }
+  erroBox.classList.remove('show');
+
+  const categoria = document.getElementById('f-cat').value;
+  const tipoProcesso = document.getElementById('f-proc').value;
+  const renach = document.getElementById('f-renach').value.trim();
+  const nomeMae = document.getElementById('f-mae').value.trim();
+  const nomePai = document.getElementById('f-pai').value.trim();
+  const sexo = document.getElementById('f-sexo').value;
+  const nacionalidade = document.getElementById('f-nacionalidade').value.trim();
+  const naturalidade = document.getElementById('f-naturalidade').value.trim();
+  const naturalidadeUF = document.getElementById('f-naturalidade-uf').value;
+  const numeroRegistro = document.getElementById('f-num-registro').value.trim();
+
+  if (state.alunos.find(a => a.cpf === cpf)){
+    erroBox.textContent = 'Já existe um aluno cadastrado com esse CPF.';
+    erroBox.classList.add('show');
+    cpfInput.classList.add('invalido');
+    return;
+  }
+
+  const novoAluno = {
+    id: 'a_' + Date.now(),
+    nome, cpf, rg, dataNascimento: nasc, categoria, tipoProcesso,
+    numeroRenach: renach, nomeMae, nomePai,
+    sexo, nacionalidade, naturalidade, naturalidadeUF, numeroRegistro,
+    foto: fotoSelecionadaBase64,
+    documentos: documentosExigidos(tipoProcesso).map(tipo => ({ tipo, apresentado: false })),
+    exames: REGRAS.examesObrigatorios.map(tipo => ({ tipo, resultado: null, numeroLaudo: '' })),
+    aulasTeoricas: [],
+    aulasPraticas: [],
+    etapas: gerarEtapasIniciais(categoria),
+    statusProntuario: 'pendente',
+    taxas: [],
+  };
+  state.alunos.push(novoAluno);
+  await salvarDados();
+  mostrarToast('Aluno matriculado com sucesso.');
+  e.target.reset();
+  document.getElementById('f-cat').value = 'B';
+  fotoSelecionadaBase64 = null;
+  atualizarPreviewFotoFormulario();
+
+  // leva direto para o prontuário recém-criado, na tela de consulta
+  document.querySelector('.nav-btn[data-screen="consulta"]').click();
+  abrirDetalheAluno(novoAluno.id);
+});
+
+/* ============================================================
+   TELA: CONSULTAR PRONTUÁRIO — lista
+   ============================================================ */
+function mostrarListaConsulta(){
+  document.getElementById('consulta-lista-view').style.display = '';
+  document.getElementById('consulta-detalhe-view').style.display = 'none';
+  alunoSelecionadoId = null;
+}
+
+document.getElementById('busca-aluno').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter'){ e.preventDefault(); executarBuscaComCarregamento(); }
+});
+document.getElementById('btn-buscar-cpf').addEventListener('click', executarBuscaComCarregamento);
+document.getElementById('btn-voltar-lista').addEventListener('click', () => {
+  // limpa a busca ao voltar, senão um CPF exato no campo reabriria o mesmo prontuário
+  document.getElementById('busca-aluno').value = '';
+  document.getElementById('search-feedback').textContent = '';
+  document.getElementById('search-feedback').className = 'search-feedback';
+  mostrarListaConsulta();
+  renderListaAlunos();
+});
+
+/* Simula o tempo de consulta ao sistema interno antes de exibir o resultado.
+   Os dados exibidos são sempre reais — vêm de state.alunos, carregado do
+   armazenamento no servidor (SQLite via API /api/dados). Não há nenhuma fonte externa. */
+let buscaEmAndamento = false;
+async function executarBuscaComCarregamento(){
+  const termoBruto = (document.getElementById('busca-aluno').value || '').trim();
+  const container = document.getElementById('lista-alunos');
+  const feedback = document.getElementById('search-feedback');
+
+  if (termoBruto === ''){
+    renderListaAlunos();
+    return;
+  }
+  if (buscaEmAndamento) return;
+  buscaEmAndamento = true;
+
+  feedback.textContent = '';
+  feedback.className = 'search-feedback';
+  container.innerHTML = `<div class="carregando-busca">
+    <div class="spinner"></div>
+    <p>Consultando sistema interno do CFC...</p>
+  </div>`;
+
+  await new Promise(resolve => setTimeout(resolve, 700));
+
+  buscaEmAndamento = false;
+  renderListaAlunos();
+}
+
+function renderListaAlunos(){
+  const termoBruto = (document.getElementById('busca-aluno').value || '').trim();
+  const termo = termoBruto.toLowerCase();
+  const termoCpf = termoBruto.replace(/\D/g, ''); // só dígitos, pra comparar CPF de verdade
+  const buscaAtiva = termoBruto !== '';
+  const container = document.getElementById('lista-alunos');
+  const feedback = document.getElementById('search-feedback');
+
+  // sem busca ativa: não lista ninguém — precisa pesquisar pra ver algo
+  if (!buscaAtiva){
+    feedback.textContent = '';
+    feedback.className = 'search-feedback';
+    container.innerHTML = `<div class="empty aguardando-busca">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <p>Digite o CPF do aluno acima e clique em "Consultar" para buscar no sistema.</p>
+    </div>`;
+    return;
+  }
+
+  // busca real nos prontuários já criados no sistema (state.alunos, persistido no servidor via API)
+  const filtrados = state.alunos.filter(a =>
+    a.nome.toLowerCase().includes(termo) ||
+    (termoCpf.length > 0 && a.cpf.includes(termoCpf))
+  );
+
+  if (filtrados.length === 0){
+    feedback.textContent = `Nenhum prontuário encontrado para "${termoBruto}".`;
+    feedback.className = 'search-feedback nao-encontrado';
+  } else {
+    feedback.textContent = `${filtrados.length} prontuário(s) encontrado(s) para "${termoBruto}".`;
+    feedback.className = 'search-feedback encontrado';
+  }
+
+  // se o termo bate exatamente com o CPF de um único aluno, abre o prontuário direto
+  if (termoCpf.length === 11){
+    const exato = state.alunos.find(a => a.cpf === termoCpf);
+    if (exato){
+      abrirDetalheAluno(exato.id);
+      return;
+    }
+  }
+
+  if (filtrados.length === 0){
+    container.innerHTML = `<div class="empty">Nenhum prontuário encontrado com esse CPF ou nome nos registros do sistema.</div>`;
+    return;
+  }
+
+  container.innerHTML = filtrados.map(a => {
+    const statusMap = {
+      regular: '<span class="tag ok">Regular</span>',
+      irregular: '<span class="tag pend">Irregular</span>',
+      pendente: '<span class="tag pendente-amarelo">Pendente</span>',
+    };
+    const tag = statusMap[a.statusProntuario || 'pendente'];
+    const avatar = a.foto
+      ? `<img src="${a.foto}" alt="">`
+      : iniciais(a.nome);
+    const metaTexto = `CPF ${formatarCpf(a.cpf)} · Cat. ${a.categoria} · ${LABELS[a.tipoProcesso]}`;
+    return `
+      <div class="aluno-item" data-id="${a.id}">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div class="avatar-mini">${avatar}</div>
+          <div>
+            <div class="nome">${escapeHtml(a.nome)}</div>
+            <div class="meta">${metaTexto}</div>
+          </div>
+        </div>
+        ${tag}
+      </div>`;
+  }).join('');
+
+  container.querySelectorAll('.aluno-item').forEach(el => {
+    el.addEventListener('click', () => abrirDetalheAluno(el.dataset.id));
+  });
+}
+
+function iniciais(nome){
+  const partes = nome.trim().split(/\s+/);
+  const ini = (partes[0]?.[0] || '') + (partes.length > 1 ? partes[partes.length - 1][0] : '');
+  return ini.toUpperCase();
+}
+function formatarCpf(cpf){
+  if (!cpf || cpf.length !== 11) return cpf;
+  return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+}
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ============================================================
+   TELA: CONSULTAR PRONTUÁRIO — detalhe do aluno
+   ============================================================ */
+function abrirDetalheAluno(id){
+  alunoSelecionadoId = id;
+  document.getElementById('consulta-lista-view').style.display = 'none';
+  document.getElementById('consulta-detalhe-view').style.display = '';
+  renderDetalheAluno();
+}
+
+function getAlunoAtual(){
+  return state.alunos.find(a => a.id === alunoSelecionadoId);
+}
+
+function renderDetalheAluno(){
+  const aluno = getAlunoAtual();
+  if (!aluno) return;
+  const v = validarProntuario(aluno);
+
+  const seloClasse = v.completo ? 'ok' : 'pend';
+  const seloTitulo = v.completo ? 'Prontuário completo' : 'Prontuário pendente';
+  const seloTexto = v.completo
+    ? 'Todos os documentos, exames e carga horária mínima foram cumpridos.'
+    : 'Ainda há pendências — veja os itens marcados abaixo.';
+
+  const avatarGrande = aluno.foto
+    ? `<img src="${aluno.foto}" alt="Foto de ${escapeHtml(aluno.nome)}">`
+    : iniciais(aluno.nome);
+
+  const filiacaoPartes = [aluno.nomeMae, aluno.nomePai].filter(Boolean);
+  const protocolo = 'PRT-' + aluno.id.replace('a_', '').slice(0, 10).toUpperCase();
+  const agora = new Date().toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+
+  const statusBadgeMap = {
+    regular: '<span class="situacao-badge situacao-regular">Regular</span>',
+    irregular: '<span class="situacao-badge situacao-irregular">Irregular</span>',
+    pendente: '<span class="situacao-badge situacao-pendente">Pendente</span>',
+  };
+
+  const taxasPendentes = (aluno.taxas || []).filter(t => t.status !== 'paga');
+  const totalPendente = taxasPendentes.reduce((s, t) => s + Number(t.valor), 0);
+
+  const html = `
+    <div class="resultado-consulta">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+      <div>
+        <strong>Registro localizado no sistema interno</strong>
+        <span>Protocolo ${protocolo} · Consulta realizada em ${agora} · Base: cadastros do CFC</span>
+      </div>
+    </div>
+
+    ${taxasPendentes.length > 0 ? `
+    <div class="alerta-regularizacao">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+      <div>
+        <strong>Taxa de Regularização pendente</strong>
+        <span>${taxasPendentes.length === 1 ? 'Há 1 taxa em aberto' : `Há ${taxasPendentes.length} taxas em aberto`} — total de R$ ${totalPendente.toFixed(2).replace('.', ',')}. Oriente o aluno a regularizar o pagamento para manter o prontuário em dia.</span>
+      </div>
+    </div>` : ''}
+
+    <div class="card card-perfil">
+      <div class="card-perfil-top">
+        <span class="dados-eyebrow">Dados do condutor</span>
+        ${aluno.naturalidadeUF ? `
+        <div class="detran-uf-badge">
+          <svg viewBox="0 0 40 40" fill="none">
+            <defs>
+              <linearGradient id="logoGradPeq" x1="0" y1="0" x2="40" y2="40">
+                <stop offset="0" stop-color="#F0A82E"/>
+                <stop offset="1" stop-color="#D9860F"/>
+              </linearGradient>
+            </defs>
+            <rect width="40" height="40" rx="10" fill="url(#logoGradPeq)"/>
+            <circle cx="20" cy="20" r="9" stroke="#fff" stroke-width="2" fill="none"/>
+            <circle cx="20" cy="20" r="2.3" fill="#fff"/>
+            <path d="M20 9.5 V13 M20 27 V30.5 M9.5 20 H13 M27 20 H30.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>DETRAN-${escapeHtml(aluno.naturalidadeUF)}</span>
+        </div>` : ''}
+      </div>
+      <div class="detalhe-header">
+        <div class="avatar-grande">${avatarGrande}</div>
+        <div class="titulos">
+          <h1>${escapeHtml(aluno.nome)} ${statusBadgeMap[aluno.statusProntuario || 'pendente']}</h1>
+          <div class="foto-trocar">
+            <input type="file" id="foto-trocar-input" accept="image/*">
+            ${aluno.foto ? `<button class="btn-ajustar-foto" type="button" id="btn-ajustar-foto-existente">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+              Ajustar enquadramento
+            </button>` : ''}
+          </div>
+        </div>
+      </div>
+
+      <div class="dados-grid">
+        <div class="dado-item">
+          <span class="dado-label">CPF</span>
+          <span class="dado-valor">${formatarCpf(aluno.cpf)}</span>
+        </div>
+        <div class="dado-item">
+          <span class="dado-label">RG</span>
+          <span class="dado-valor">${escapeHtml(aluno.rg)}</span>
+        </div>
+        <div class="dado-item">
+          <span class="dado-label">Sexo</span>
+          <span class="dado-valor dado-valor-pequeno">${aluno.sexo ? escapeHtml(aluno.sexo) : '—'}</span>
+        </div>
+        <div class="dado-item">
+          <span class="dado-label">Categoria</span>
+          <span class="dado-valor">${aluno.categoria}</span>
+        </div>
+        <div class="dado-item">
+          <span class="dado-label">Nacionalidade</span>
+          <span class="dado-valor dado-valor-pequeno">${aluno.nacionalidade ? escapeHtml(aluno.nacionalidade) : '—'}</span>
+        </div>
+        <div class="dado-item">
+          <span class="dado-label">Naturalidade</span>
+          <span class="dado-valor dado-valor-pequeno">${aluno.naturalidade ? escapeHtml(aluno.naturalidade) : '—'}${aluno.naturalidadeUF ? ' / ' + escapeHtml(aluno.naturalidadeUF) : ''}</span>
+        </div>
+        <div class="dado-item">
+          <span class="dado-label">Tipo de processo</span>
+          <span class="dado-valor dado-valor-pequeno">${LABELS[aluno.tipoProcesso]}</span>
+        </div>
+        <div class="dado-item">
+          <span class="dado-label">Nº de registro</span>
+          <span class="dado-valor dado-valor-pequeno">${aluno.numeroRegistro ? escapeHtml(aluno.numeroRegistro) : '—'}</span>
+        </div>
+        <div class="dado-item">
+          <span class="dado-label">RENACH</span>
+          <span class="dado-valor dado-valor-pequeno">${aluno.numeroRenach ? escapeHtml(aluno.numeroRenach) : '—'}</span>
+        </div>
+        <div class="dado-item dado-item-full dado-filiacao">
+          <div>
+            <span class="dado-label">Filiação — Mãe</span>
+            <span class="dado-valor dado-valor-pequeno">${aluno.nomeMae ? escapeHtml(aluno.nomeMae) : '—'}</span>
+          </div>
+          <div>
+            <span class="dado-label">Filiação — Pai</span>
+            <span class="dado-valor dado-valor-pequeno">${aluno.nomePai ? escapeHtml(aluno.nomePai) : '—'}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Dados da CNH</h2>
+      <p class="card-note">Preencha quando o documento for expedido pelo Detran.</p>
+      <div class="grid">
+        <div class="field">
+          <label for="cnh-doc-org">Doc. Identidade / Órgão Emissor</label>
+          <input id="cnh-doc-org" value="${escapeHtml(aluno.cnhDocOrgao || '')}" placeholder="ex.: 12.345.678-9 SSP/GO" onchange="atualizarDadoCnh('cnhDocOrgao', this.value)">
+        </div>
+        <div class="field">
+          <label for="cnh-1hab">1ª Habilitação</label>
+          <input id="cnh-1hab" type="date" value="${aluno.cnhPrimeiraHabilitacao || ''}" onchange="atualizarDadoCnh('cnhPrimeiraHabilitacao', this.value)">
+        </div>
+        <div class="field">
+          <label for="cnh-emissao">Data de Emissão</label>
+          <input id="cnh-emissao" type="date" value="${aluno.cnhDataEmissao || ''}" onchange="atualizarDadoCnh('cnhDataEmissao', this.value)">
+        </div>
+        <div class="field">
+          <label for="cnh-espelho">Espelho</label>
+          <input id="cnh-espelho" value="${escapeHtml(aluno.cnhEspelho || '')}" placeholder="nº do espelho" onchange="atualizarDadoCnh('cnhEspelho', this.value)">
+        </div>
+        <div class="field">
+          <label for="cnh-local">Local de Emissão</label>
+          <input id="cnh-local" value="${escapeHtml(aluno.cnhLocalEmissao || '')}" placeholder="cidade / UF" onchange="atualizarDadoCnh('cnhLocalEmissao', this.value)">
+        </div>
+        <div class="field">
+          <label for="cnh-validade">Validade</label>
+          <input id="cnh-validade" type="date" value="${aluno.cnhValidade || ''}" onchange="atualizarDadoCnh('cnhValidade', this.value)">
+        </div>
+      </div>
+    </div>
+
+    <div class="selo ${seloClasse}">
+      <div class="selo-badge"><span>${v.completo ? 'PRONTUÁRIO<br>OK' : 'PENDENTE'}</span></div>
+      <div class="selo-text">
+        <strong>${seloTitulo}</strong>
+        <span>${seloTexto}</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Documentos ${v.docsOk ? '<span class="tag ok">OK</span>' : `<span class="tag pend">${v.docsFaltantes.length} pendente(s)</span>`}</h2>
+      <table>
+        <tr><th>Documento</th><th>Status</th><th></th></tr>
+        ${aluno.documentos.map(d => `
+          <tr>
+            <td>${LABELS[d.tipo] || d.tipo}</td>
+            <td>${d.apresentado ? '<span class="tag ok">Apresentado</span>' : '<span class="tag pend">Pendente</span>'}</td>
+            <td>${d.apresentado ? '' : `<button class="tiny" data-doc="${d.tipo}" onclick="marcarDocumento('${d.tipo}')">Marcar apresentado</button>`}</td>
+          </tr>`).join('')}
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Exames ${v.examesOk ? '<span class="tag ok">OK</span>' : `<span class="tag pend">${v.examesPendencias.length} pendência(s)</span>`}</h2>
+      <table>
+        <tr><th>Exame</th><th>Resultado</th><th>Registrar</th></tr>
+        ${aluno.exames.map(ex => `
+          <tr>
+            <td>${LABELS[ex.tipo]}</td>
+            <td>${ex.resultado ? `<span class="tag ${['apto','aprovado'].includes(ex.resultado) ? 'ok' : 'pend'}">${ex.resultado}</span>` : '—'}</td>
+            <td>
+              <div class="inline-form">
+                <select id="res-${ex.tipo}">
+                  ${['medico','psicotecnico'].includes(ex.tipo)
+                    ? '<option value="apto">Apto</option><option value="inapto">Inapto</option>'
+                    : '<option value="aprovado">Aprovado</option><option value="reprovado">Reprovado</option>'}
+                </select>
+                <input type="text" id="laudo-${ex.tipo}" placeholder="nº laudo">
+                <button class="tiny" onclick="registrarExame('${ex.tipo}')">Salvar</button>
+              </div>
+            </td>
+          </tr>`).join('')}
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Aulas teóricas ${v.teoricaOk ? '<span class="tag ok">OK</span>' : '<span class="tag pend">Pendente</span>'}</h2>
+      <p class="card-note">Resolução CONTRAN 1.020/2025 não exige carga horária teórica mínima — o que vale é a aprovação no exame teórico. Registro abaixo é apenas para controle de frequência.</p>
+      <div class="progress-row"><span>${aluno.aulasTeoricas.reduce((s,a)=>s+Number(a.duracao||0),0)} min registrados</span><span>mínimo: ${REGRAS.cargaTeoricaMinimaMin} min</span></div>
+      <div class="inline-form">
+        <input type="number" id="teo-duracao" placeholder="min" value="50">
+        <input type="text" id="teo-disciplina" placeholder="disciplina">
+        <input type="text" id="teo-instrutor" placeholder="instrutor">
+        <select id="teo-modalidade"><option value="presencial">Presencial</option><option value="ead">EAD</option></select>
+        <button class="tiny" onclick="registrarAulaTeorica()">+ Registrar aula</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Aulas práticas ${v.praticaOk ? '<span class="tag ok">OK</span>' : '<span class="tag pend">Pendente</span>'}</h2>
+      <div class="progress-row"><span>${v.totalPratica} min registrados</span><span>mínimo: ${REGRAS.cargaPraticaMinimaMin} min</span></div>
+      <div class="progress-bar"><div style="width:${Math.min(100, v.totalPratica / REGRAS.cargaPraticaMinimaMin * 100)}%"></div></div>
+      <div class="inline-form">
+        <input type="number" id="pra-duracao" placeholder="min" value="50">
+        <input type="text" id="pra-instrutor" placeholder="instrutor">
+        <input type="text" id="pra-veiculo" placeholder="veículo">
+        <button class="tiny" onclick="registrarAulaPratica()">+ Registrar aula</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Exames, cursos e etapas</h2>
+      <p class="card-note">Etapas que aparecem no prontuário. Use o botão abaixo para preencher automaticamente conforme a categoria, ou adicione etapas avulsas.</p>
+      <div class="etapas-toolbar">
+        <button class="secondary" onclick="preencherEtapasAutomaticamente()">⟳ Preencher automaticamente pela categoria</button>
+      </div>
+      <table class="tabela-etapas">
+        <tr><th>Etapa</th><th>Data</th><th>Observação</th><th>Status</th><th></th></tr>
+        ${(aluno.etapas || []).map(et => `
+          <tr>
+            <td>${escapeHtml(et.nome)}</td>
+            <td><input type="date" value="${et.data || ''}" onchange="atualizarEtapa('${et.id}', 'data', this.value)"></td>
+            <td><input type="text" placeholder="Observação (opcional)" value="${escapeHtml(et.observacao || '')}" onchange="atualizarEtapa('${et.id}', 'observacao', this.value)"></td>
+            <td>
+              <button class="tiny ${et.concluido ? 'tag-ok-btn' : ''}" onclick="alternarEtapaConcluida('${et.id}')">${et.concluido ? 'Concluído ✓' : 'Marcar concluído'}</button>
+            </td>
+            <td><button class="tiny remover" onclick="removerEtapa('${et.id}')" title="Remover etapa">✕</button></td>
+          </tr>`).join('') || '<tr><td colspan="5" style="color:var(--ink-soft);">Nenhuma etapa cadastrada ainda — use "Preencher automaticamente" acima.</td></tr>'}
+      </table>
+      <div class="inline-form" style="margin-top:14px;">
+        <input type="text" id="nova-etapa-nome" placeholder="Nome da nova etapa">
+        <button class="tiny" onclick="adicionarEtapaCustom()">+ Adicionar etapa</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Taxas e pagamentos</h2>
+      <p class="card-note">Controle interno de cobranças do CFC — gere uma taxa pendente e marque como paga quando o aluno quitar.</p>
+      <table class="tabela-taxas">
+        <tr><th>Descrição</th><th>Valor</th><th>Status</th><th></th></tr>
+        ${(aluno.taxas || []).map(tx => `
+          <tr>
+            <td>${escapeHtml(tx.descricao)}</td>
+            <td class="valor-taxa">R$ ${Number(tx.valor).toFixed(2).replace('.', ',')}</td>
+            <td>
+              ${tx.status === 'paga'
+                ? '<span class="tag ok">Paga</span>'
+                : '<span class="tag pend">Taxa de Regularização</span>'}
+            </td>
+            <td>
+              ${tx.status !== 'paga'
+                ? `<button class="tiny tag-ok-btn" onclick="marcarTaxaPaga('${tx.id}')">Marcar como paga</button>`
+                : ''}
+              <button class="tiny remover" onclick="removerTaxa('${tx.id}')" title="Remover taxa">✕</button>
+            </td>
+          </tr>`).join('') || '<tr><td colspan="4" style="color:var(--ink-soft);">Nenhuma taxa gerada ainda.</td></tr>'}
+      </table>
+      <div class="inline-form" style="margin-top:14px;">
+        <input type="text" id="nova-taxa-descricao" placeholder="Descrição (ex.: Taxa de exame teórico)">
+        <input type="number" id="nova-taxa-valor" placeholder="Valor (R$)" min="0" step="0.01">
+        <button class="tiny" onclick="gerarTaxaPendente()">+ Gerar taxa pendente</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Situação do prontuário</h2>
+      <p class="card-note">Classificação manual — defina a situação atual deste prontuário. A situação selecionada aparece ao lado do nome do aluno, no topo.</p>
+      <div class="status-toggle">
+        <button class="status-btn status-regular ${aluno.statusProntuario === 'regular' ? 'ativo' : ''}" onclick="definirStatusProntuario('regular')">
+          <span class="status-dot"></span> Regular
+        </button>
+        <button class="status-btn status-pendente ${(!aluno.statusProntuario || aluno.statusProntuario === 'pendente') ? 'ativo' : ''}" onclick="definirStatusProntuario('pendente')">
+          <span class="status-dot"></span> Pendente
+        </button>
+        <button class="status-btn status-irregular ${aluno.statusProntuario === 'irregular' ? 'ativo' : ''}" onclick="definirStatusProntuario('irregular')">
+          <span class="status-dot"></span> Irregular
+        </button>
+      </div>
+    </div>
+
+    <div class="zona-risco">
+      <button class="link-perigo" type="button" onclick="excluirAluno('${aluno.id}')">Excluir este prontuário</button>
+    </div>
+  `;
+  document.getElementById('detalhe-conteudo').innerHTML = html;
+
+  const fotoInput = document.getElementById('foto-trocar-input');
+  if (fotoInput){
+    fotoInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        abrirEditorFoto(ev.target.result, async (fotoRecortada) => {
+          const alunoAtual = getAlunoAtual();
+          alunoAtual.foto = fotoRecortada;
+          await salvarDados();
+          mostrarToast('Foto atualizada.');
+          renderDetalheAluno();
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  const btnAjustarExistente = document.getElementById('btn-ajustar-foto-existente');
+  if (btnAjustarExistente){
+    btnAjustarExistente.addEventListener('click', () => {
+      const alunoAtual = getAlunoAtual();
+      if (!alunoAtual.foto) return;
+      abrirEditorFoto(alunoAtual.foto, async (fotoRecortada) => {
+        alunoAtual.foto = fotoRecortada;
+        await salvarDados();
+        mostrarToast('Enquadramento da foto atualizado.');
+        renderDetalheAluno();
+      });
+    });
+  }
+}
+
+async function marcarDocumento(tipo){
+  const aluno = getAlunoAtual();
+  const doc = aluno.documentos.find(d => d.tipo === tipo);
+  doc.apresentado = true;
+  await salvarDados();
+  mostrarToast('Documento marcado como apresentado.');
+  renderDetalheAluno();
+}
+
+async function registrarExame(tipo){
+  const aluno = getAlunoAtual();
+  const ex = aluno.exames.find(e => e.tipo === tipo);
+  ex.resultado = document.getElementById(`res-${tipo}`).value;
+  ex.numeroLaudo = document.getElementById(`laudo-${tipo}`).value;
+  await salvarDados();
+  mostrarToast('Exame registrado.');
+  renderDetalheAluno();
+}
+
+async function registrarAulaTeorica(){
+  const aluno = getAlunoAtual();
+  aluno.aulasTeoricas.push({
+    duracao: Number(document.getElementById('teo-duracao').value || 50),
+    disciplina: document.getElementById('teo-disciplina').value,
+    instrutor: document.getElementById('teo-instrutor').value,
+    modalidade: document.getElementById('teo-modalidade').value,
+  });
+  await salvarDados();
+  mostrarToast('Aula teórica registrada.');
+  renderDetalheAluno();
+}
+
+async function registrarAulaPratica(){
+  const aluno = getAlunoAtual();
+  aluno.aulasPraticas.push({
+    duracao: Number(document.getElementById('pra-duracao').value || 50),
+    instrutor: document.getElementById('pra-instrutor').value,
+    veiculo: document.getElementById('pra-veiculo').value,
+  });
+  await salvarDados();
+  mostrarToast('Aula prática registrada.');
+  renderDetalheAluno();
+}
+
+/* ---------- Etapas do prontuário ---------- */
+async function preencherEtapasAutomaticamente(){
+  const aluno = getAlunoAtual();
+  if (!aluno.etapas) aluno.etapas = [];
+  const modelo = etapasPorCategoria(aluno.categoria);
+  const tiposExistentes = new Set(aluno.etapas.map(e => e.tipo));
+  const novas = modelo
+    .filter(e => !tiposExistentes.has(e.tipo))
+    .map(e => ({
+      id: 'et_' + e.tipo + '_' + Math.random().toString(36).slice(2, 8),
+      tipo: e.tipo, nome: e.nome, data: '', observacao: '', concluido: false,
+    }));
+  if (novas.length === 0){
+    mostrarToast('Todas as etapas da categoria já estão no prontuário.');
+    return;
+  }
+  aluno.etapas = [...aluno.etapas, ...novas];
+  await salvarDados();
+  mostrarToast(`${novas.length} etapa(s) adicionada(s) automaticamente.`);
+  renderDetalheAluno();
+}
+
+async function adicionarEtapaCustom(){
+  const input = document.getElementById('nova-etapa-nome');
+  const nome = (input.value || '').trim();
+  if (!nome){
+    mostrarToast('Digite um nome para a etapa antes de adicionar.');
+    return;
+  }
+  const aluno = getAlunoAtual();
+  if (!aluno.etapas) aluno.etapas = [];
+  aluno.etapas.push({
+    id: 'et_custom_' + Math.random().toString(36).slice(2, 8),
+    tipo: 'custom', nome, data: '', observacao: '', concluido: false,
+  });
+  await salvarDados();
+  mostrarToast('Etapa adicionada.');
+  renderDetalheAluno();
+}
+
+async function atualizarEtapa(etapaId, campo, valor){
+  const aluno = getAlunoAtual();
+  const et = (aluno.etapas || []).find(e => e.id === etapaId);
+  if (!et) return;
+  et[campo] = valor;
+  await salvarDados();
+}
+
+async function alternarEtapaConcluida(etapaId){
+  const aluno = getAlunoAtual();
+  const et = (aluno.etapas || []).find(e => e.id === etapaId);
+  if (!et) return;
+  et.concluido = !et.concluido;
+  await salvarDados();
+  renderDetalheAluno();
+}
+
+async function removerEtapa(etapaId){
+  const aluno = getAlunoAtual();
+  aluno.etapas = (aluno.etapas || []).filter(e => e.id !== etapaId);
+  await salvarDados();
+  mostrarToast('Etapa removida.');
+  renderDetalheAluno();
+}
+
+async function atualizarDadoCnh(campo, valor){
+  const aluno = getAlunoAtual();
+  aluno[campo] = valor;
+  await salvarDados();
+}
+
+async function gerarTaxaPendente(){
+  const descInput = document.getElementById('nova-taxa-descricao');
+  const valorInput = document.getElementById('nova-taxa-valor');
+  const descricao = descInput.value.trim();
+  const valor = parseFloat(valorInput.value);
+
+  if (!descricao || isNaN(valor) || valor <= 0){
+    mostrarToast('Preencha a descrição e um valor válido antes de gerar a taxa.');
+    return;
+  }
+
+  const aluno = getAlunoAtual();
+  if (!aluno.taxas) aluno.taxas = [];
+  aluno.taxas.push({
+    id: 'tx_' + Math.random().toString(36).slice(2, 9),
+    descricao, valor,
+    status: 'pendente',
+    dataCriacao: new Date().toISOString(),
+    dataPagamento: null,
+  });
+  await salvarDados();
+  descInput.value = '';
+  valorInput.value = '';
+  mostrarToast('Taxa pendente gerada.');
+  renderDetalheAluno();
+}
+
+async function marcarTaxaPaga(taxaId){
+  const aluno = getAlunoAtual();
+  const tx = (aluno.taxas || []).find(t => t.id === taxaId);
+  if (!tx) return;
+  tx.status = 'paga';
+  tx.dataPagamento = new Date().toISOString();
+  await salvarDados();
+  mostrarToast('Taxa marcada como paga.');
+  renderDetalheAluno();
+}
+
+async function removerTaxa(taxaId){
+  const aluno = getAlunoAtual();
+  aluno.taxas = (aluno.taxas || []).filter(t => t.id !== taxaId);
+  await salvarDados();
+  mostrarToast('Taxa removida.');
+  renderDetalheAluno();
+}
+
+function excluirAluno(id){
+  const aluno = state.alunos.find(a => a.id === id);
+  if (!aluno) return;
+
+  document.getElementById('confirmar-exclusao-texto').textContent =
+    `Excluir o prontuário de "${aluno.nome}"? Essa ação não pode ser desfeita.`;
+  const btn = document.getElementById('confirmar-exclusao-btn');
+  btn.onclick = async () => {
+    state.alunos = state.alunos.filter(a => a.id !== id);
+    await salvarDados();
+    fecharConfirmarExclusao();
+    mostrarToast('Prontuário excluído.');
+    document.getElementById('busca-aluno').value = '';
+    mostrarListaConsulta();
+    renderListaAlunos();
+  };
+  document.getElementById('confirmar-exclusao-overlay').style.display = 'flex';
+}
+
+function fecharConfirmarExclusao(){
+  document.getElementById('confirmar-exclusao-overlay').style.display = 'none';
+}
+
+async function definirStatusProntuario(status){
+  const aluno = getAlunoAtual();
+  aluno.statusProntuario = status;
+  await salvarDados();
+  const rotulos = { regular: 'Regular', pendente: 'Pendente', irregular: 'Irregular' };
+  mostrarToast(`Prontuário marcado como ${rotulos[status]}.`);
+  renderDetalheAluno();
+}
+
+/* ============================================================
+   INICIALIZAÇÃO
+   ============================================================ */
+(async function init(){
+  await carregarDados();
+  renderListaAlunos();
+})();
+</script>
+</body>
+</html>
