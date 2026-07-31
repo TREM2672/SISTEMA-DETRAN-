@@ -586,6 +586,7 @@ button.tiny:hover{ background:#FFF3DE; color:var(--ochre-dark); border-color: rg
 .etapas-toolbar{ margin-bottom:14px; }
 .tabela-etapas td{ padding: 7px 8px; }
 .tabela-etapas input[type=date]{ width: 130px; }
+.tabela-etapas input[type=number]{ width: 70px; }
 .tabela-etapas input[type=text]{ width: 100%; min-width: 140px; }
 button.tiny.tag-ok-btn{ background: var(--ok-bg); color: var(--ok); }
 button.tiny.remover{ background: var(--pend-bg); color: var(--pend); font-weight:700; }
@@ -1046,6 +1047,7 @@ function gerarEtapasIniciais(categoria){
     tipo: e.tipo,
     nome: e.nome,
     data: '',
+    minutos: '',
     observacao: '',
     concluido: false,
   }));
@@ -1064,7 +1066,9 @@ function validarProntuario(aluno){
   });
   const examesOk = examesPendencias.length === 0;
 
-  const totalTeorica = aluno.aulasTeoricas.reduce((s, a) => s + Number(a.duracao || 0), 0);
+  const totalTeorica = (aluno.etapas || [])
+    .filter(e => e.tipo.startsWith('curso_'))
+    .reduce((s, e) => s + Number(e.minutos || 0), 0);
   const teoricaOk = totalTeorica >= REGRAS.cargaTeoricaMinimaMin;
 
   const totalPratica = aluno.aulasPraticas.reduce((s, a) => s + Number(a.duracao || 0), 0);
@@ -1889,32 +1893,12 @@ function renderDetalheAluno(){
     </div>
 
     <div class="card">
-      <h2>Aulas teóricas ${v.teoricaOk ? '<span class="tag ok">OK</span>' : '<span class="tag pend">Pendente</span>'}</h2>
-      <p class="card-note">Resolução CONTRAN 1.020/2025 não exige carga horária teórica mínima — o que vale é a aprovação no exame teórico. Registro abaixo é apenas para controle de frequência.</p>
-      <div class="progress-row"><span>${aluno.aulasTeoricas.reduce((s,a)=>s+Number(a.duracao||0),0)} min registrados</span><span>mínimo: ${REGRAS.cargaTeoricaMinimaMin} min</span></div>
-      <div class="mini-form">
-        <div class="mini-field">
-          <label for="teo-duracao">Duração (min)</label>
-          <input type="number" id="teo-duracao" placeholder="ex.: 50" min="1">
+      <div class="card-header-row">
+        <div>
+          <h2>Aulas práticas ${v.praticaOk ? '<span class="tag ok">OK</span>' : '<span class="tag pend">Pendente</span>'}</h2>
         </div>
-        <div class="mini-field">
-          <label for="teo-disciplina">Disciplina</label>
-          <input type="text" id="teo-disciplina" placeholder="ex.: Legislação">
-        </div>
-        <div class="mini-field">
-          <label for="teo-instrutor">Instrutor</label>
-          <input type="text" id="teo-instrutor" placeholder="nome do instrutor">
-        </div>
-        <div class="mini-field">
-          <label for="teo-modalidade">Modalidade</label>
-          <select id="teo-modalidade"><option value="presencial">Presencial</option><option value="ead">EAD</option></select>
-        </div>
-        <button class="tiny" onclick="registrarAulaTeorica()">+ Registrar aula</button>
+        ${!v.praticaOk ? `<button class="secondary" onclick="aprovarAulaPratica()">✓ Marcar como concluída</button>` : ''}
       </div>
-    </div>
-
-    <div class="card">
-      <h2>Aulas práticas ${v.praticaOk ? '<span class="tag ok">OK</span>' : '<span class="tag pend">Pendente</span>'}</h2>
       <div class="progress-row"><span>${v.totalPratica} min registrados</span><span>mínimo: ${REGRAS.cargaPraticaMinimaMin} min</span></div>
       <div class="progress-bar"><div style="width:${Math.min(100, v.totalPratica / REGRAS.cargaPraticaMinimaMin * 100)}%"></div></div>
       <div class="mini-form">
@@ -1935,7 +1919,7 @@ function renderDetalheAluno(){
     </div>
     <div class="card">
       <h2>Exames, cursos e etapas</h2>
-      <p class="card-note">Etapas que aparecem no prontuário. Use o botão abaixo para preencher automaticamente conforme a categoria, ou adicione etapas avulsas.</p>
+      <p class="card-note">Etapas que aparecem no prontuário. Use o botão abaixo para preencher automaticamente conforme a categoria, ou adicione etapas avulsas. O controle de frequência das aulas teóricas (minutos) agora é feito direto por matéria, na coluna "Minutos" abaixo — não exige mínimo, a Resolução CONTRAN 1.020/2025 não estabelece carga horária teórica obrigatória.</p>
       <div class="etapas-toolbar">
         <button class="secondary" onclick="preencherEtapasAutomaticamente()">⟳ Preencher automaticamente pela categoria</button>
       </div>
@@ -1953,18 +1937,25 @@ function renderDetalheAluno(){
         </div>
         <button class="tiny" onclick="aplicarDataEmLote()">📅 Aplicar data a todos da modalidade</button>
       </div>` : ''}
+      ${(() => {
+        const totalMin = (aluno.etapas || []).filter(e => e.tipo.startsWith('curso_')).reduce((s, e) => s + Number(e.minutos || 0), 0);
+        return totalMin > 0 ? `<p class="card-note"><strong>${totalMin} min</strong> de aula teórica registrados ao todo (soma da coluna Minutos).</p>` : '';
+      })()}
       <table class="tabela-etapas">
-        <tr><th>Etapa</th><th>Data</th><th>Observação</th><th>Status</th><th></th></tr>
+        <tr><th>Etapa</th><th>Data</th><th>Minutos</th><th>Observação</th><th>Status</th><th></th></tr>
         ${(aluno.etapas || []).map(et => `
           <tr>
             <td>${escapeHtml(et.nome)}</td>
             <td><input type="date" value="${et.data || ''}" onchange="atualizarEtapa('${et.id}', 'data', this.value)"></td>
+            <td>${et.tipo.startsWith('curso_')
+              ? `<input type="number" min="0" placeholder="min" value="${et.minutos || ''}" onchange="atualizarEtapa('${et.id}', 'minutos', this.value)">`
+              : '<span style="color:var(--ink-soft);">—</span>'}</td>
             <td><input type="text" placeholder="Observação (opcional)" value="${escapeHtml(et.observacao || '')}" onchange="atualizarEtapa('${et.id}', 'observacao', this.value)"></td>
             <td>
               <button class="tiny ${et.concluido ? 'tag-ok-btn' : ''}" onclick="alternarEtapaConcluida('${et.id}')">${et.concluido ? 'Concluído ✓' : 'Marcar concluído'}</button>
             </td>
             <td><button class="tiny remover" onclick="removerEtapa('${et.id}')" title="Remover etapa">✕</button></td>
-          </tr>`).join('') || '<tr><td colspan="5" style="color:var(--ink-soft);">Nenhuma etapa cadastrada ainda — use "Preencher automaticamente" acima.</td></tr>'}
+          </tr>`).join('') || '<tr><td colspan="6" style="color:var(--ink-soft);">Nenhuma etapa cadastrada ainda — use "Preencher automaticamente" acima.</td></tr>'}
       </table>
       <div class="mini-form">
         <div class="mini-field">
@@ -2081,24 +2072,6 @@ async function registrarExame(tipo){
   renderDetalheAluno();
 }
 
-async function registrarAulaTeorica(){
-  const duracao = Number(document.getElementById('teo-duracao').value);
-  if (!duracao || duracao <= 0){
-    mostrarToast('Informe a duração da aula em minutos.');
-    return;
-  }
-  const aluno = getAlunoAtual();
-  aluno.aulasTeoricas.push({
-    duracao,
-    disciplina: document.getElementById('teo-disciplina').value,
-    instrutor: document.getElementById('teo-instrutor').value,
-    modalidade: document.getElementById('teo-modalidade').value,
-  });
-  await salvarDados();
-  mostrarToast('Aula teórica registrada.');
-  renderDetalheAluno();
-}
-
 async function registrarAulaPratica(){
   const duracao = Number(document.getElementById('pra-duracao').value);
   if (!duracao || duracao <= 0){
@@ -2116,6 +2089,18 @@ async function registrarAulaPratica(){
   renderDetalheAluno();
 }
 
+async function aprovarAulaPratica(){
+  const aluno = getAlunoAtual();
+  const v = validarProntuario(aluno);
+  const faltam = REGRAS.cargaPraticaMinimaMin - v.totalPratica;
+  if (faltam > 0){
+    aluno.aulasPraticas.push({ duracao: faltam, instrutor: '', veiculo: '' });
+    await salvarDados();
+  }
+  mostrarToast('Aulas práticas marcadas como concluídas.');
+  renderDetalheAluno();
+}
+
 /* ---------- Etapas do prontuário ---------- */
 async function preencherEtapasAutomaticamente(){
   const aluno = getAlunoAtual();
@@ -2126,7 +2111,7 @@ async function preencherEtapasAutomaticamente(){
     .filter(e => !tiposExistentes.has(e.tipo))
     .map(e => ({
       id: 'et_' + e.tipo + '_' + Math.random().toString(36).slice(2, 8),
-      tipo: e.tipo, nome: e.nome, data: '', observacao: '', concluido: false,
+      tipo: e.tipo, nome: e.nome, data: '', minutos: '', observacao: '', concluido: false,
     }));
   if (novas.length === 0){
     mostrarToast('Todas as etapas da categoria já estão no prontuário.');
