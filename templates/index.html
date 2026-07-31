@@ -579,7 +579,7 @@ button.tiny:hover{ background:#FFF3DE; color:var(--ochre-dark); border-color: rg
   flex:1; border:none; background:transparent; padding: 10px 0;
   font-size:14.5px;
 }
-.search-bar-pro input:focus{ box-shadow:none; }
+.search-bar-pro input:focus{ box-shadow:none; outline:none; }
 .search-bar-pro button.primary{ margin-top:0; padding: 11px 24px; white-space:nowrap; }
 .search-feedback{ text-align:center; }
 
@@ -645,6 +645,24 @@ tr:last-child td{ border-bottom:none;}
 .inline-form select, .inline-form input{ padding:6px 8px; font-size:12.5px;}
 .inline-form input[type=number]{ width:64px;}
 .inline-form input[type=text]{ width:110px;}
+
+.mini-form{
+  display:flex; gap:14px; align-items:flex-end; flex-wrap:wrap;
+  background: var(--paper); border:1px solid var(--line); border-radius: var(--radius-sm);
+  padding: 14px 16px; margin-top:10px;
+}
+.mini-field{ display:flex; flex-direction:column; gap:5px; }
+.mini-field label{
+  font-family:'Inter', sans-serif; font-size:10.5px; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.05em; color: var(--ink-soft);
+}
+.mini-field input, .mini-field select{
+  padding: 8px 10px; font-size:13px; border:1.5px solid var(--line); border-radius: var(--radius-sm);
+  background:#fff; font-family:'Inter', sans-serif;
+}
+.mini-field input[type=number]{ width:88px; }
+.mini-field input[type=text]{ width:150px; }
+.mini-form button.tiny{ height:35px; padding:0 16px; }
 
 .progress-row{ display:flex; justify-content:space-between; font-size:12px; color:var(--ink-soft); margin-bottom:6px;}
 .progress-bar{ height:6px; background:var(--paper-2); border-radius:4px; overflow:hidden; margin-bottom:14px;}
@@ -1846,7 +1864,6 @@ function renderDetalheAluno(){
                     ? '<option value="apto">Apto</option><option value="inapto">Inapto</option>'
                     : '<option value="aprovado">Aprovado</option><option value="reprovado">Reprovado</option>'}
                 </select>
-                <input type="text" id="laudo-${ex.tipo}" placeholder="nº laudo">
                 <button class="tiny" onclick="registrarExame('${ex.tipo}')">Salvar</button>
               </div>
             </td>
@@ -1858,11 +1875,23 @@ function renderDetalheAluno(){
       <h2>Aulas teóricas ${v.teoricaOk ? '<span class="tag ok">OK</span>' : '<span class="tag pend">Pendente</span>'}</h2>
       <p class="card-note">Resolução CONTRAN 1.020/2025 não exige carga horária teórica mínima — o que vale é a aprovação no exame teórico. Registro abaixo é apenas para controle de frequência.</p>
       <div class="progress-row"><span>${aluno.aulasTeoricas.reduce((s,a)=>s+Number(a.duracao||0),0)} min registrados</span><span>mínimo: ${REGRAS.cargaTeoricaMinimaMin} min</span></div>
-      <div class="inline-form">
-        <input type="number" id="teo-duracao" placeholder="min" value="50">
-        <input type="text" id="teo-disciplina" placeholder="disciplina">
-        <input type="text" id="teo-instrutor" placeholder="instrutor">
-        <select id="teo-modalidade"><option value="presencial">Presencial</option><option value="ead">EAD</option></select>
+      <div class="mini-form">
+        <div class="mini-field">
+          <label for="teo-duracao">Duração (min)</label>
+          <input type="number" id="teo-duracao" placeholder="ex.: 50" min="1">
+        </div>
+        <div class="mini-field">
+          <label for="teo-disciplina">Disciplina</label>
+          <input type="text" id="teo-disciplina" placeholder="ex.: Legislação">
+        </div>
+        <div class="mini-field">
+          <label for="teo-instrutor">Instrutor</label>
+          <input type="text" id="teo-instrutor" placeholder="nome do instrutor">
+        </div>
+        <div class="mini-field">
+          <label for="teo-modalidade">Modalidade</label>
+          <select id="teo-modalidade"><option value="presencial">Presencial</option><option value="ead">EAD</option></select>
+        </div>
         <button class="tiny" onclick="registrarAulaTeorica()">+ Registrar aula</button>
       </div>
     </div>
@@ -1871,10 +1900,19 @@ function renderDetalheAluno(){
       <h2>Aulas práticas ${v.praticaOk ? '<span class="tag ok">OK</span>' : '<span class="tag pend">Pendente</span>'}</h2>
       <div class="progress-row"><span>${v.totalPratica} min registrados</span><span>mínimo: ${REGRAS.cargaPraticaMinimaMin} min</span></div>
       <div class="progress-bar"><div style="width:${Math.min(100, v.totalPratica / REGRAS.cargaPraticaMinimaMin * 100)}%"></div></div>
-      <div class="inline-form">
-        <input type="number" id="pra-duracao" placeholder="min" value="50">
-        <input type="text" id="pra-instrutor" placeholder="instrutor">
-        <input type="text" id="pra-veiculo" placeholder="veículo">
+      <div class="mini-form">
+        <div class="mini-field">
+          <label for="pra-duracao">Duração (min)</label>
+          <input type="number" id="pra-duracao" placeholder="ex.: 50" min="1">
+        </div>
+        <div class="mini-field">
+          <label for="pra-instrutor">Instrutor</label>
+          <input type="text" id="pra-instrutor" placeholder="nome do instrutor">
+        </div>
+        <div class="mini-field">
+          <label for="pra-veiculo">Veículo</label>
+          <input type="text" id="pra-veiculo" placeholder="placa ou modelo">
+        </div>
         <button class="tiny" onclick="registrarAulaPratica()">+ Registrar aula</button>
       </div>
     </div>
@@ -1897,8 +1935,11 @@ function renderDetalheAluno(){
             <td><button class="tiny remover" onclick="removerEtapa('${et.id}')" title="Remover etapa">✕</button></td>
           </tr>`).join('') || '<tr><td colspan="5" style="color:var(--ink-soft);">Nenhuma etapa cadastrada ainda — use "Preencher automaticamente" acima.</td></tr>'}
       </table>
-      <div class="inline-form" style="margin-top:14px;">
-        <input type="text" id="nova-etapa-nome" placeholder="Nome da nova etapa">
+      <div class="mini-form">
+        <div class="mini-field">
+          <label for="nova-etapa-nome">Nova etapa</label>
+          <input type="text" id="nova-etapa-nome" placeholder="ex.: Reciclagem de pontos">
+        </div>
         <button class="tiny" onclick="adicionarEtapaCustom()">+ Adicionar etapa</button>
       </div>
     </div>
@@ -1906,7 +1947,18 @@ function renderDetalheAluno(){
     <div class="card">
       <h2>Taxas e pagamentos</h2>
       <p class="card-note">Controle interno de cobranças do CFC — gere uma taxa pendente e marque como paga quando o aluno quitar.</p>
-      <table class="tabela-taxas">
+      <div class="mini-form">
+        <div class="mini-field">
+          <label for="nova-taxa-descricao">Descrição</label>
+          <input type="text" id="nova-taxa-descricao" placeholder="ex.: Taxa de exame teórico">
+        </div>
+        <div class="mini-field">
+          <label for="nova-taxa-valor">Valor (R$)</label>
+          <input type="number" id="nova-taxa-valor" placeholder="ex.: 150" min="0" step="0.01">
+        </div>
+        <button class="tiny" onclick="gerarTaxaPendente()">+ Gerar taxa pendente</button>
+      </div>
+      <table class="tabela-taxas" style="margin-top:16px;">
         <tr><th>Descrição</th><th>Valor</th><th>Status</th><th></th></tr>
         ${(aluno.taxas || []).map(tx => `
           <tr>
@@ -1925,11 +1977,6 @@ function renderDetalheAluno(){
             </td>
           </tr>`).join('') || '<tr><td colspan="4" style="color:var(--ink-soft);">Nenhuma taxa gerada ainda.</td></tr>'}
       </table>
-      <div class="inline-form" style="margin-top:14px;">
-        <input type="text" id="nova-taxa-descricao" placeholder="Descrição (ex.: Taxa de exame teórico)">
-        <input type="number" id="nova-taxa-valor" placeholder="Valor (R$)" min="0" step="0.01">
-        <button class="tiny" onclick="gerarTaxaPendente()">+ Gerar taxa pendente</button>
-      </div>
     </div>
 
     <div class="card">
@@ -2001,16 +2048,20 @@ async function registrarExame(tipo){
   const aluno = getAlunoAtual();
   const ex = aluno.exames.find(e => e.tipo === tipo);
   ex.resultado = document.getElementById(`res-${tipo}`).value;
-  ex.numeroLaudo = document.getElementById(`laudo-${tipo}`).value;
   await salvarDados();
   mostrarToast('Exame registrado.');
   renderDetalheAluno();
 }
 
 async function registrarAulaTeorica(){
+  const duracao = Number(document.getElementById('teo-duracao').value);
+  if (!duracao || duracao <= 0){
+    mostrarToast('Informe a duração da aula em minutos.');
+    return;
+  }
   const aluno = getAlunoAtual();
   aluno.aulasTeoricas.push({
-    duracao: Number(document.getElementById('teo-duracao').value || 50),
+    duracao,
     disciplina: document.getElementById('teo-disciplina').value,
     instrutor: document.getElementById('teo-instrutor').value,
     modalidade: document.getElementById('teo-modalidade').value,
@@ -2021,9 +2072,14 @@ async function registrarAulaTeorica(){
 }
 
 async function registrarAulaPratica(){
+  const duracao = Number(document.getElementById('pra-duracao').value);
+  if (!duracao || duracao <= 0){
+    mostrarToast('Informe a duração da aula em minutos.');
+    return;
+  }
   const aluno = getAlunoAtual();
   aluno.aulasPraticas.push({
-    duracao: Number(document.getElementById('pra-duracao').value || 50),
+    duracao,
     instrutor: document.getElementById('pra-instrutor').value,
     veiculo: document.getElementById('pra-veiculo').value,
   });
