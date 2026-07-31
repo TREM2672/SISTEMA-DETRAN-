@@ -296,6 +296,16 @@ button.tiny:hover{ background:#FFF3DE; color:var(--ochre-dark); border-color: rg
 .aluno-item:hover{ border-color: var(--navy-2); box-shadow: var(--shadow-md); transform: translateY(-1px); }
 .aluno-item .nome{ font-weight:600; font-size:14px;}
 .aluno-item .meta{ font-size:12px; color:var(--ink-soft); font-family:'JetBrains Mono', monospace;}
+.aluno-item-excluir{
+  all:unset; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  width:28px; height:28px; border-radius: var(--radius-sm);
+  color: var(--ink-soft);
+  transition: background .15s ease, color .15s ease;
+}
+.aluno-item-excluir svg{ width:15px; height:15px; }
+.aluno-item-excluir:hover{ background: var(--pend-bg); color: var(--pend); }
+
+.consulta-atalho{ text-align:center; margin-top:16px; }
 .empty{
   text-align:center; padding: 48px 20px; color: var(--ink-soft); font-size:14px;
   border: 1.5px dashed var(--line); border-radius: var(--radius);
@@ -708,13 +718,17 @@ tr:last-child td{ border-bottom:none;}
       </div>
     </div>
     <nav>
-      <button class="nav-btn active" data-screen="novo">
+      <button class="nav-btn active" data-screen="consulta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        Consulta interna (CPF)
+      </button>
+      <button class="nav-btn" data-screen="novo">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
         Novo prontuário
       </button>
-      <button class="nav-btn" data-screen="consulta">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        Consulta interna (CPF)
+      <button class="nav-btn" data-screen="lista">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        Prontuários cadastrados
       </button>
     </nav>
     <div class="sidebar-footer">
@@ -727,7 +741,7 @@ tr:last-child td{ border-bottom:none;}
   <main>
 
     <!-- ===================== TELA: NOVO PRONTUÁRIO ===================== -->
-    <section class="screen active" id="screen-novo">
+    <section class="screen" id="screen-novo">
       <h1>Novo prontuário</h1>
       <p class="subhead">Matricule um aluno e o sistema já monta o checklist de documentos e exames exigidos para o tipo de processo.</p>
 
@@ -840,7 +854,7 @@ tr:last-child td{ border-bottom:none;}
     </section>
 
     <!-- ===================== TELA: CONSULTA INTERNA ===================== -->
-    <section class="screen" id="screen-consulta">
+    <section class="screen active" id="screen-consulta">
 
       <div id="consulta-lista-view">
         <div class="consulta-central">
@@ -858,6 +872,10 @@ tr:last-child td{ border-bottom:none;}
             <button class="primary" id="btn-buscar-cpf" type="button">Consultar</button>
           </div>
           <p class="search-feedback" id="search-feedback"></p>
+
+          <div class="consulta-atalho">
+            <button class="secondary" type="button" id="btn-ir-lista-cadastrados">📋 Ver todos os prontuários cadastrados</button>
+          </div>
         </div>
 
         <div id="lista-alunos" class="lista-alunos"></div>
@@ -868,6 +886,18 @@ tr:last-child td{ border-bottom:none;}
         <div id="detalhe-conteudo"></div>
       </div>
 
+    </section>
+
+    <!-- ===================== TELA: PRONTUÁRIOS CADASTRADOS ===================== -->
+    <section class="screen" id="screen-lista">
+      <h1>Prontuários cadastrados</h1>
+      <p class="subhead">Todos os alunos matriculados no sistema. Clique num prontuário para abri-lo, ou use o ícone de lixeira pra excluir direto daqui.</p>
+
+      <div class="search-row">
+        <input id="filtro-lista-cadastrados" type="text" placeholder="Filtrar por nome ou CPF...">
+      </div>
+
+      <div id="lista-todos-alunos" class="lista-alunos"></div>
     </section>
 
   </main>
@@ -1070,7 +1100,15 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
       mostrarListaConsulta();
       renderListaAlunos();
     }
+    if (btn.dataset.screen === 'lista'){
+      document.getElementById('filtro-lista-cadastrados').value = '';
+      renderListaTodosAlunos();
+    }
   });
+});
+
+document.getElementById('btn-ir-lista-cadastrados').addEventListener('click', () => {
+  document.querySelector('.nav-btn[data-screen="lista"]').click();
 });
 
 function mostrarToast(msg){
@@ -1507,6 +1545,79 @@ function renderListaAlunos(){
   container.querySelectorAll('.aluno-item').forEach(el => {
     el.addEventListener('click', () => abrirDetalheAluno(el.dataset.id));
   });
+}
+
+/* ============================================================
+   TELA: PRONTUÁRIOS CADASTRADOS — lista completa, com exclusão
+   ============================================================ */
+function renderListaTodosAlunos(){
+  const termoBruto = (document.getElementById('filtro-lista-cadastrados').value || '').trim();
+  const termo = termoBruto.toLowerCase();
+  const termoCpf = termoBruto.replace(/\D/g, '');
+  const container = document.getElementById('lista-todos-alunos');
+
+  if (state.alunos.length === 0){
+    container.innerHTML = `<div class="empty">Nenhum prontuário cadastrado ainda.</div>`;
+    return;
+  }
+
+  const lista = termoBruto === ''
+    ? state.alunos
+    : state.alunos.filter(a =>
+        a.nome.toLowerCase().includes(termo) ||
+        (termoCpf.length > 0 && a.cpf.includes(termoCpf))
+      );
+
+  if (lista.length === 0){
+    container.innerHTML = `<div class="empty">Nenhum prontuário encontrado para "${termoBruto}".</div>`;
+    return;
+  }
+
+  container.innerHTML = lista.map(a => {
+    const statusMap = {
+      regular: '<span class="tag ok">Regular</span>',
+      irregular: '<span class="tag pend">Irregular</span>',
+      pendente: '<span class="tag pendente-amarelo">Pendente</span>',
+    };
+    const tag = statusMap[a.statusProntuario || 'pendente'];
+    const avatar = a.foto
+      ? `<img src="${a.foto}" alt="">`
+      : iniciais(a.nome);
+    const metaTexto = `CPF ${formatarCpf(a.cpf)} · Cat. ${a.categoria} · ${LABELS[a.tipoProcesso]}`;
+    return `
+      <div class="aluno-item" data-id="${a.id}">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div class="avatar-mini">${avatar}</div>
+          <div>
+            <div class="nome">${escapeHtml(a.nome)}</div>
+            <div class="meta">${metaTexto}</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          ${tag}
+          <button class="aluno-item-excluir" type="button" title="Excluir prontuário" data-id="${a.id}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6h16Z"/></svg>
+          </button>
+        </div>
+      </div>`;
+  }).join('');
+
+  container.querySelectorAll('.aluno-item').forEach(el => {
+    el.addEventListener('click', () => abrirDetalheDoCadastro(el.dataset.id));
+  });
+  container.querySelectorAll('.aluno-item-excluir').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      excluirAluno(btn.dataset.id);
+    });
+  });
+}
+
+document.getElementById('filtro-lista-cadastrados').addEventListener('input', renderListaTodosAlunos);
+
+function abrirDetalheDoCadastro(id){
+  document.querySelector('.nav-btn[data-screen="consulta"]').click();
+  abrirDetalheAluno(id);
 }
 
 function iniciais(nome){
@@ -2044,13 +2155,21 @@ function excluirAluno(id){
     `Excluir o prontuário de "${aluno.nome}"? Essa ação não pode ser desfeita.`;
   const btn = document.getElementById('confirmar-exclusao-btn');
   btn.onclick = async () => {
+    const estavaNoDetalheDesteAluno =
+      document.getElementById('consulta-detalhe-view').style.display !== 'none' &&
+      alunoSelecionadoId === id;
+
     state.alunos = state.alunos.filter(a => a.id !== id);
     await salvarDados();
     fecharConfirmarExclusao();
     mostrarToast('Prontuário excluído.');
-    document.getElementById('busca-aluno').value = '';
-    mostrarListaConsulta();
+
+    if (estavaNoDetalheDesteAluno){
+      document.getElementById('busca-aluno').value = '';
+      mostrarListaConsulta();
+    }
     renderListaAlunos();
+    renderListaTodosAlunos();
   };
   document.getElementById('confirmar-exclusao-overlay').style.display = 'flex';
 }
