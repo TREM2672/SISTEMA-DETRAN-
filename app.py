@@ -74,6 +74,35 @@ def salvar_dados():
     return jsonify({"ok": True, "total_alunos": len(alunos)})
 
 
+@app.route("/api/consultores", methods=["GET"])
+def obter_consultores():
+    """Retorna todos os consultores cadastrados no servidor."""
+    conn = get_db()
+    row = conn.execute(
+        "SELECT valor FROM armazenamento WHERE chave = 'consultores'"
+    ).fetchone()
+    conn.close()
+    consultores = json.loads(row["valor"]) if row else []
+    return jsonify({"consultores": consultores})
+
+
+@app.route("/api/consultores", methods=["POST"])
+def salvar_consultores():
+    """Recebe a lista completa de consultores e persiste no servidor."""
+    payload = request.get_json(force=True, silent=True) or {}
+    consultores = payload.get("consultores", [])
+
+    conn = get_db()
+    conn.execute(
+        """INSERT INTO armazenamento (chave, valor) VALUES ('consultores', ?)
+           ON CONFLICT(chave) DO UPDATE SET valor = excluded.valor""",
+        (json.dumps(consultores, ensure_ascii=False),),
+    )
+    conn.commit()
+    conn.close()
+    return jsonify({"ok": True, "total_consultores": len(consultores)})
+
+
 if __name__ == "__main__":
     debug = os.environ.get("FLASK_DEBUG", "0") == "1"
     port = int(os.environ.get("PORT", 5000))

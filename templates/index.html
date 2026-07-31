@@ -936,6 +936,26 @@ tr:last-child td{ border-bottom:none;}
       <h1>Prontuários cadastrados</h1>
       <p class="subhead">Todos os alunos matriculados no sistema. Clique num prontuário para abri-lo, ou use o ícone de lixeira pra excluir direto daqui.</p>
 
+      <div class="card">
+        <h2>Consultores</h2>
+        <p class="card-note">Cadastre o nome e a senha de cada consultor autorizado a fazer consultas. A senha é pedida toda vez que alguém for pesquisar um prontuário na tela de Consulta interna.</p>
+        <table>
+          <tr><th>Nome</th><th>Senha</th><th></th></tr>
+          <tbody id="consultores-lista"></tbody>
+        </table>
+        <div class="mini-form">
+          <div class="mini-field">
+            <label for="novo-consultor-nome">Nome do consultor</label>
+            <input type="text" id="novo-consultor-nome" placeholder="ex.: Ana Souza">
+          </div>
+          <div class="mini-field">
+            <label for="novo-consultor-senha">Senha</label>
+            <input type="password" id="novo-consultor-senha" placeholder="senha de acesso">
+          </div>
+          <button class="tiny" onclick="adicionarConsultor()">+ Adicionar consultor</button>
+        </div>
+      </div>
+
       <div class="search-row">
         <input id="filtro-lista-cadastrados" type="text" placeholder="Filtrar por nome ou CPF...">
       </div>
@@ -974,6 +994,22 @@ tr:last-child td{ border-bottom:none;}
     <div class="modal-actions">
       <button class="secondary" type="button" onclick="fecharConfirmarExclusao()">Cancelar</button>
       <button class="perigo" type="button" id="confirmar-exclusao-btn">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="senha-consultor-overlay" style="display:none;">
+  <div class="modal-box">
+    <h3>Senha do consultor</h3>
+    <p class="card-note">Informe a senha de consultor para realizar esta consulta.</p>
+    <div class="field">
+      <label for="senha-consultor-input">Senha</label>
+      <input type="password" id="senha-consultor-input" placeholder="senha do consultor">
+    </div>
+    <p class="form-erro" id="senha-consultor-erro"></p>
+    <div class="modal-actions">
+      <button class="secondary" type="button" id="senha-consultor-cancelar">Cancelar</button>
+      <button class="primary" type="button" id="senha-consultor-confirmar">Confirmar</button>
     </div>
   </div>
 </div>
@@ -1101,7 +1137,7 @@ function validarProntuario(aluno){
    Os dados agora ficam salvos no servidor (arquivo dados.db),
    não mais apenas no navegador.
    ============================================================ */
-let state = { alunos: [] };
+let state = { alunos: [], consultores: [] };
 let alunoSelecionadoId = null;
 
 async function carregarDados(){
@@ -1130,6 +1166,32 @@ async function salvarDados(){
   }
 }
 
+async function carregarConsultores(){
+  try{
+    const res = await fetch('/api/consultores');
+    if (!res.ok) throw new Error('Falha ao carregar consultores do servidor.');
+    const json = await res.json();
+    state.consultores = json.consultores || [];
+  } catch(e){
+    console.error(e);
+    state.consultores = [];
+    mostrarToast('Não foi possível carregar os consultores do servidor.');
+  }
+}
+async function salvarConsultores(){
+  try{
+    const res = await fetch('/api/consultores', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ consultores: state.consultores }),
+    });
+    if (!res.ok) throw new Error('Falha ao salvar consultores no servidor.');
+  } catch(e){
+    console.error(e);
+    mostrarToast('Não foi possível salvar os consultores no servidor.');
+  }
+}
+
 /* ============================================================
    NAVEGAÇÃO ENTRE TELAS
    ============================================================ */
@@ -1149,6 +1211,7 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
     if (btn.dataset.screen === 'lista'){
       document.getElementById('filtro-lista-cadastrados').value = '';
       renderListaTodosAlunos();
+      renderListaConsultores();
     }
   });
 });
@@ -1476,9 +1539,9 @@ function mostrarListaConsulta(){
 }
 
 document.getElementById('busca-aluno').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter'){ e.preventDefault(); executarBuscaComCarregamento(); }
+  if (e.key === 'Enter'){ e.preventDefault(); pedirSenhaEBuscar(); }
 });
-document.getElementById('btn-buscar-cpf').addEventListener('click', executarBuscaComCarregamento);
+document.getElementById('btn-buscar-cpf').addEventListener('click', pedirSenhaEBuscar);
 document.getElementById('btn-voltar-lista').addEventListener('click', () => {
   // limpa a busca ao voltar, senão um CPF exato no campo reabriria o mesmo prontuário
   document.getElementById('busca-aluno').value = '';
@@ -1487,6 +1550,57 @@ document.getElementById('btn-voltar-lista').addEventListener('click', () => {
   mostrarListaConsulta();
   renderListaAlunos();
 });
+
+/* ============================================================
+   SENHA DE CONSULTOR — exigida a cada consulta por CPF/nome
+   ============================================================ */
+function pedirSenhaEBuscar(){
+  const termoBruto = (document.getElementById('busca-aluno').value || '').trim();
+  if (termoBruto === ''){
+    renderListaAlunos();
+    return;
+  }
+  if (!state.consultores || state.consultores.length === 0){
+    mostrarToast('Nenhum consultor cadastrado. Cadastre um consultor em "Prontuários cadastrados".');
+    return;
+  }
+  abrirModalSenhaConsultor(() => executarBuscaComCarregamento());
+}
+
+function abrirModalSenhaConsultor(onSuccess){
+  const overlay = document.getElementById('senha-consultor-overlay');
+  const input = document.getElementById('senha-consultor-input');
+  const erro = document.getElementById('senha-consultor-erro');
+  const btnConfirmar = document.getElementById('senha-consultor-confirmar');
+  const btnCancelar = document.getElementById('senha-consultor-cancelar');
+
+  input.value = '';
+  erro.textContent = '';
+  erro.classList.remove('show');
+  overlay.style.display = 'flex';
+  input.focus();
+
+  const confirmar = () => {
+    const senha = input.value;
+    const consultor = state.consultores.find(c => c.senha === senha);
+    if (!consultor){
+      erro.textContent = 'Senha de consultor inválida.';
+      erro.classList.add('show');
+      input.focus();
+      input.select();
+      return;
+    }
+    overlay.style.display = 'none';
+    mostrarToast(`Consulta liberada — consultor: ${consultor.nome}.`);
+    onSuccess();
+  };
+  const cancelar = () => { overlay.style.display = 'none'; };
+
+  // reatribuição (não addEventListener) evita empilhar handlers de aberturas anteriores
+  btnConfirmar.onclick = confirmar;
+  btnCancelar.onclick = cancelar;
+  input.onkeydown = (e) => { if (e.key === 'Enter'){ e.preventDefault(); confirmar(); } };
+}
 
 /* Simula o tempo de consulta ao sistema interno antes de exibir o resultado.
    Os dados exibidos são sempre reais — vêm de state.alunos, carregado do
@@ -1661,6 +1775,54 @@ function renderListaTodosAlunos(){
 
 document.getElementById('filtro-lista-cadastrados').addEventListener('input', renderListaTodosAlunos);
 
+/* ============================================================
+   CONSULTORES — nome + senha exigida para realizar consultas
+   ============================================================ */
+function renderListaConsultores(){
+  const tbody = document.getElementById('consultores-lista');
+  if (!state.consultores || state.consultores.length === 0){
+    tbody.innerHTML = '<tr><td colspan="3" style="color:var(--ink-soft);">Nenhum consultor cadastrado ainda.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.consultores.map(c => `
+    <tr>
+      <td><input type="text" value="${escapeHtml(c.nome)}" onchange="atualizarConsultor('${c.id}', 'nome', this.value)"></td>
+      <td><input type="password" value="${escapeHtml(c.senha)}" onchange="atualizarConsultor('${c.id}', 'senha', this.value)"></td>
+      <td><button class="tiny remover" onclick="removerConsultor('${c.id}')" title="Remover consultor">✕</button></td>
+    </tr>`).join('');
+}
+
+async function adicionarConsultor(){
+  const nomeInput = document.getElementById('novo-consultor-nome');
+  const senhaInput = document.getElementById('novo-consultor-senha');
+  const nome = nomeInput.value.trim();
+  const senha = senhaInput.value;
+  if (!nome || !senha){
+    mostrarToast('Informe nome e senha do consultor.');
+    return;
+  }
+  state.consultores.push({ id: 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6), nome, senha });
+  await salvarConsultores();
+  mostrarToast('Consultor cadastrado.');
+  nomeInput.value = '';
+  senhaInput.value = '';
+  renderListaConsultores();
+}
+
+async function atualizarConsultor(id, campo, valor){
+  const c = state.consultores.find(x => x.id === id);
+  if (!c) return;
+  c[campo] = campo === 'nome' ? valor.trim() : valor;
+  await salvarConsultores();
+}
+
+async function removerConsultor(id){
+  state.consultores = state.consultores.filter(c => c.id !== id);
+  await salvarConsultores();
+  mostrarToast('Consultor removido.');
+  renderListaConsultores();
+}
+
 function abrirDetalheDoCadastro(id){
   document.querySelector('.nav-btn[data-screen="consulta"]').click();
   abrirDetalheAluno(id);
@@ -1777,7 +1939,7 @@ function renderDetalheAluno(){
       <div class="dados-grid">
         <div class="dado-item">
           <span class="dado-label">CPF</span>
-          <span class="dado-valor">${formatarCpf(aluno.cpf)}</span>
+          <span class="dado-valor">${escapeHtml(formatarCpf(aluno.cpf))}</span>
         </div>
         <div class="dado-item">
           <span class="dado-label">RG</span>
@@ -1789,7 +1951,7 @@ function renderDetalheAluno(){
         </div>
         <div class="dado-item">
           <span class="dado-label">Categoria</span>
-          <span class="dado-valor">${aluno.categoria}</span>
+          <span class="dado-valor">${escapeHtml(aluno.categoria)}</span>
         </div>
         <div class="dado-item">
           <span class="dado-label">Nacionalidade</span>
@@ -1801,7 +1963,7 @@ function renderDetalheAluno(){
         </div>
         <div class="dado-item">
           <span class="dado-label">Tipo de processo</span>
-          <span class="dado-valor dado-valor-pequeno">${LABELS[aluno.tipoProcesso]}</span>
+          <span class="dado-valor dado-valor-pequeno">${LABELS[aluno.tipoProcesso] ? escapeHtml(LABELS[aluno.tipoProcesso]) : '—'}</span>
         </div>
         <div class="dado-item">
           <span class="dado-label">Nº de registro</span>
@@ -1834,11 +1996,11 @@ function renderDetalheAluno(){
         </div>
         <div class="field">
           <label for="cnh-1hab">1ª Habilitação</label>
-          <input id="cnh-1hab" type="date" value="${aluno.cnhPrimeiraHabilitacao || ''}" onchange="atualizarDadoCnh('cnhPrimeiraHabilitacao', this.value)">
+          <input id="cnh-1hab" type="date" value="${escapeHtml(aluno.cnhPrimeiraHabilitacao || '')}" onchange="atualizarDadoCnh('cnhPrimeiraHabilitacao', this.value)">
         </div>
         <div class="field">
           <label for="cnh-emissao">Data de Emissão</label>
-          <input id="cnh-emissao" type="date" value="${aluno.cnhDataEmissao || ''}" onchange="atualizarDadoCnh('cnhDataEmissao', this.value)">
+          <input id="cnh-emissao" type="date" value="${escapeHtml(aluno.cnhDataEmissao || '')}" onchange="atualizarDadoCnh('cnhDataEmissao', this.value)">
         </div>
         <div class="field">
           <label for="cnh-espelho">Espelho</label>
@@ -1850,7 +2012,7 @@ function renderDetalheAluno(){
         </div>
         <div class="field">
           <label for="cnh-validade">Validade</label>
-          <input id="cnh-validade" type="date" value="${aluno.cnhValidade || ''}" onchange="atualizarDadoCnh('cnhValidade', this.value)">
+          <input id="cnh-validade" type="date" value="${escapeHtml(aluno.cnhValidade || '')}" onchange="atualizarDadoCnh('cnhValidade', this.value)">
         </div>
       </div>
     </div>
@@ -1872,7 +2034,7 @@ function renderDetalheAluno(){
         <tr><th>Documento</th><th>Status</th><th></th></tr>
         ${aluno.documentos.map(d => `
           <tr>
-            <td>${LABELS[d.tipo] || d.tipo}</td>
+            <td>${escapeHtml(LABELS[d.tipo] || d.tipo)}</td>
             <td>${d.apresentado ? '<span class="tag ok">Apresentado</span>' : '<span class="tag pend">Pendente</span>'}</td>
             <td>${d.apresentado ? '' : `<button class="tiny" data-doc="${d.tipo}" onclick="marcarDocumento('${d.tipo}')">Marcar apresentado</button>`}</td>
           </tr>`).join('')}
@@ -1882,22 +2044,27 @@ function renderDetalheAluno(){
     <div class="card">
       <h2>Exames ${v.examesOk ? '<span class="tag ok">OK</span>' : `<span class="tag pend">${v.examesPendencias.length} pendência(s)</span>`}</h2>
       <table>
-        <tr><th>Exame</th><th>Resultado</th><th>Registrar</th></tr>
-        ${aluno.exames.map(ex => `
+        <tr><th>Exame</th><th>Resultado</th><th>Nº do laudo</th><th>Registrar</th></tr>
+        ${aluno.exames.map(ex => {
+          const opcoes = ['medico','psicotecnico'].includes(ex.tipo)
+            ? [['apto','Apto'], ['inapto','Inapto']]
+            : [['aprovado','Aprovado'], ['reprovado','Reprovado']];
+          return `
           <tr>
-            <td>${LABELS[ex.tipo]}</td>
-            <td>${ex.resultado ? `<span class="tag ${['apto','aprovado'].includes(ex.resultado) ? 'ok' : 'pend'}">${ex.resultado}</span>` : '—'}</td>
+            <td>${escapeHtml(LABELS[ex.tipo] || ex.tipo)}</td>
+            <td>${ex.resultado ? `<span class="tag ${['apto','aprovado'].includes(ex.resultado) ? 'ok' : 'pend'}">${escapeHtml(ex.resultado)}</span>` : '—'}</td>
+            <td>${ex.numeroLaudo ? escapeHtml(ex.numeroLaudo) : '—'}</td>
             <td>
               <div class="inline-form">
                 <select id="res-${ex.tipo}">
-                  ${['medico','psicotecnico'].includes(ex.tipo)
-                    ? '<option value="apto">Apto</option><option value="inapto">Inapto</option>'
-                    : '<option value="aprovado">Aprovado</option><option value="reprovado">Reprovado</option>'}
+                  ${opcoes.map(([valor, rotulo]) => `<option value="${valor}" ${ex.resultado === valor ? 'selected' : ''}>${rotulo}</option>`).join('')}
                 </select>
+                <input type="text" id="laudo-${ex.tipo}" placeholder="nº do laudo (opcional)" value="${escapeHtml(ex.numeroLaudo || '')}" style="width:120px;">
                 <button class="tiny" onclick="registrarExame('${ex.tipo}')">Salvar</button>
               </div>
             </td>
-          </tr>`).join('')}
+          </tr>`;
+        }).join('')}
       </table>
     </div>
 
@@ -1910,6 +2077,17 @@ function renderDetalheAluno(){
       </div>
       <div class="progress-row"><span>${v.totalPratica} min registrados</span><span>mínimo: ${REGRAS.cargaPraticaMinimaMin} min</span></div>
       <div class="progress-bar"><div style="width:${Math.min(100, v.totalPratica / REGRAS.cargaPraticaMinimaMin * 100)}%"></div></div>
+      ${aluno.aulasPraticas.length > 0 ? `
+      <table>
+        <tr><th>Duração</th><th>Instrutor</th><th>Veículo</th><th></th></tr>
+        ${aluno.aulasPraticas.map((a, i) => `
+          <tr>
+            <td>${Number(a.duracao || 0)} min</td>
+            <td>${a.instrutor ? escapeHtml(a.instrutor) : '—'}</td>
+            <td>${a.veiculo ? escapeHtml(a.veiculo) : '—'}</td>
+            <td><button class="tiny remover" onclick="removerAulaPratica(${i})" title="Remover aula">✕</button></td>
+          </tr>`).join('')}
+      </table>` : ''}
       <div class="mini-form">
         <div class="mini-field">
           <label for="pra-duracao">Duração (min)</label>
@@ -2076,6 +2254,7 @@ async function registrarExame(tipo){
   const aluno = getAlunoAtual();
   const ex = aluno.exames.find(e => e.tipo === tipo);
   ex.resultado = document.getElementById(`res-${tipo}`).value;
+  ex.numeroLaudo = document.getElementById(`laudo-${tipo}`).value.trim();
   await salvarDados();
   mostrarToast('Exame registrado.');
   renderDetalheAluno();
@@ -2095,6 +2274,14 @@ async function registrarAulaPratica(){
   });
   await salvarDados();
   mostrarToast('Aula prática registrada.');
+  renderDetalheAluno();
+}
+
+async function removerAulaPratica(indice){
+  const aluno = getAlunoAtual();
+  aluno.aulasPraticas.splice(indice, 1);
+  await salvarDados();
+  mostrarToast('Aula prática removida.');
   renderDetalheAluno();
 }
 
@@ -2295,8 +2482,9 @@ async function definirStatusProntuario(status){
    INICIALIZAÇÃO
    ============================================================ */
 (async function init(){
-  await carregarDados();
+  await Promise.all([carregarDados(), carregarConsultores()]);
   renderListaAlunos();
+  renderListaConsultores();
 })();
 </script>
 </body>
