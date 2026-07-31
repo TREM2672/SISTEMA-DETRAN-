@@ -384,16 +384,18 @@ button.tiny:hover{ background:#FFF3DE; color:var(--ochre-dark); border-color: rg
 .alerta-regularizacao span{ font-size:12.5px; color: var(--pend); line-height:1.5; }
 
 .resultado-consulta{
-  display:flex; align-items:center; gap:12px;
+  display:flex; align-items:center; gap:16px;
   background: var(--ok-bg); color: var(--ok);
-  border-radius: var(--radius-sm);
-  padding: 12px 16px;
-  margin-bottom: 20px;
+  border-radius: var(--radius);
+  padding: 18px 22px;
+  margin-bottom: 22px;
   font-size: 13px;
+  border: 1px solid rgba(30,155,94,0.25);
+  box-shadow: var(--shadow-sm);
 }
-.resultado-consulta svg{ width:20px; height:20px; flex-shrink:0; }
-.resultado-consulta strong{ display:block; font-size:13.5px; color: var(--ink); font-family:'Sora', sans-serif; }
-.resultado-consulta span{ font-family:'JetBrains Mono', monospace; font-size:11px; opacity:.85; }
+.resultado-consulta svg{ width:26px; height:26px; flex-shrink:0; }
+.resultado-consulta strong{ display:block; font-size:16px; color: var(--ink); font-family:'Sora', sans-serif; margin-bottom:2px; }
+.resultado-consulta span{ font-family:'JetBrains Mono', monospace; font-size:12px; opacity:.85; }
 
 .detalhe-header{ display:flex; align-items:center; gap:18px; margin-bottom: 18px; }
 .detalhe-header .titulos{ flex:1; }
@@ -495,7 +497,7 @@ button.tiny:hover{ background:#FFF3DE; color:var(--ochre-dark); border-color: rg
 
 .dados-grid{
   display:grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1px;
   background: var(--line);
   border: 1px solid var(--line);
@@ -506,7 +508,7 @@ button.tiny:hover{ background:#FFF3DE; color:var(--ochre-dark); border-color: rg
 }
 .dado-item{
   background:#fff;
-  padding: 19px 22px 19px 24px;
+  padding: 16px 14px 16px 20px;
   display:flex; flex-direction:column; gap:8px;
   position:relative;
   transition: background .15s ease;
@@ -531,12 +533,13 @@ button.tiny:hover{ background:#FFF3DE; color:var(--ochre-dark); border-color: rg
 }
 .dado-valor{
   font-family:'JetBrains Mono', monospace;
-  font-size: 29px;
+  font-size: 17px;
   font-weight:600;
   color: var(--ink);
-  letter-spacing:0.02em;
-  line-height:1.2;
+  letter-spacing:0.01em;
+  line-height:1.25;
   font-variant-numeric: tabular-nums;
+  overflow-wrap: break-word;
 }
 .dado-valor-pequeno{
   font-family:'Sora', sans-serif;
@@ -601,7 +604,7 @@ button.tiny.remover:hover{ background: var(--pend); color: #fff; }
   margin-bottom:20px;
 }
 .selo-badge{
-  width:64px; height:64px; border-radius:50%;
+  width:72px; height:72px; border-radius:50%;
   border: 2.5px solid currentColor;
   display:flex; align-items:center; justify-content:center;
   flex-shrink:0;
@@ -610,18 +613,14 @@ button.tiny.remover:hover{ background: var(--pend); color: #fff; }
 }
 .selo-badge::before{
   content:'';
-  position:absolute; inset:5px;
+  position:absolute; inset:6px;
   border-radius:50%;
   border: 1px dashed currentColor;
   opacity:.55;
 }
-.selo-badge span{
-  font-family:'Sora', sans-serif;
-  font-weight:700;
-  font-size: 10.5px;
-  letter-spacing:0.02em;
-  text-align:center;
-  line-height:1.15;
+.selo-badge svg{
+  width:30px; height:30px;
+  position:relative;
 }
 .selo.ok{ color: var(--ok); }
 .selo.pend{ color: var(--pend); }
@@ -1809,7 +1808,10 @@ function renderDetalheAluno(){
     </div>
 
     <div class="selo ${seloClasse}">
-      <div class="selo-badge"><span>${v.completo ? 'PRONTUÁRIO<br>OK' : 'PENDENTE'}</span></div>
+      <div class="selo-badge">${v.completo
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>'
+      }</div>
       <div class="selo-text">
         <strong>${seloTitulo}</strong>
         <span>${seloTexto}</span>
