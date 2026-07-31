@@ -585,12 +585,29 @@ button.tiny:hover{ background:#FFF3DE; color:var(--ochre-dark); border-color: rg
 
 .etapas-toolbar{ margin-bottom:14px; }
 .tabela-etapas td{ padding: 7px 8px; }
-.tabela-taxas td{ padding: 9px 8px; }
-.valor-taxa{ font-family:'JetBrains Mono', monospace; font-weight:600; }
 .tabela-etapas input[type=date]{ width: 130px; }
 .tabela-etapas input[type=text]{ width: 100%; min-width: 140px; }
 button.tiny.tag-ok-btn{ background: var(--ok-bg); color: var(--ok); }
 button.tiny.remover{ background: var(--pend-bg); color: var(--pend); font-weight:700; }
+
+.taxas-lista{ display:flex; flex-direction:column; gap:10px; margin-top:16px; }
+.taxa-item{
+  display:flex; align-items:center; gap:18px;
+  padding: 14px 18px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--line);
+  background:#fff;
+  box-shadow: var(--shadow-sm);
+}
+.taxa-item.pendente{ border-color: rgba(217,79,61,0.28); }
+.taxa-item.paga{ border-color: rgba(30,155,94,0.25); background: var(--ok-bg); }
+.taxa-info{ flex:1; display:flex; align-items:center; gap:10px; min-width:0; }
+.taxa-descricao{ font-weight:600; font-size:14px; color:var(--ink); overflow-wrap:anywhere; }
+.taxa-valor{
+  font-family:'JetBrains Mono', monospace; font-weight:700; font-size:17px;
+  color:var(--ink); white-space:nowrap;
+}
+.taxa-acoes{ display:flex; align-items:center; gap:8px; flex-shrink:0; }
 button.tiny.remover:hover{ background: var(--pend); color: #fff; }
 
 /* selo de status (elemento assinatura) */
@@ -1922,6 +1939,20 @@ function renderDetalheAluno(){
       <div class="etapas-toolbar">
         <button class="secondary" onclick="preencherEtapasAutomaticamente()">⟳ Preencher automaticamente pela categoria</button>
       </div>
+      ${(aluno.etapas || []).length > 0 ? `
+      <div class="mini-form" style="margin-bottom:16px;">
+        <div class="mini-field">
+          <label for="etapa-data-lote">Data</label>
+          <input type="date" id="etapa-data-lote">
+        </div>
+        <div class="mini-field">
+          <label for="etapa-modalidade-lote">Aplicar para</label>
+          <select id="etapa-modalidade-lote">
+            ${[...new Set(aluno.etapas.map(et => grupoDaEtapa(et.nome)))].map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join('')}
+          </select>
+        </div>
+        <button class="tiny" onclick="aplicarDataEmLote()">📅 Aplicar data a todos da modalidade</button>
+      </div>` : ''}
       <table class="tabela-etapas">
         <tr><th>Etapa</th><th>Data</th><th>Observação</th><th>Status</th><th></th></tr>
         ${(aluno.etapas || []).map(et => `
@@ -1958,25 +1989,22 @@ function renderDetalheAluno(){
         </div>
         <button class="tiny" onclick="gerarTaxaPendente()">+ Gerar taxa pendente</button>
       </div>
-      <table class="tabela-taxas" style="margin-top:16px;">
-        <tr><th>Descrição</th><th>Valor</th><th>Status</th><th></th></tr>
+      <div class="taxas-lista">
         ${(aluno.taxas || []).map(tx => `
-          <tr>
-            <td>${escapeHtml(tx.descricao)}</td>
-            <td class="valor-taxa">R$ ${Number(tx.valor).toFixed(2).replace('.', ',')}</td>
-            <td>
-              ${tx.status === 'paga'
-                ? '<span class="tag ok">Paga</span>'
-                : '<span class="tag pend">Taxa de Regularização</span>'}
-            </td>
-            <td>
+          <div class="taxa-item ${tx.status === 'paga' ? 'paga' : 'pendente'}">
+            <div class="taxa-info">
+              <span class="taxa-descricao">${escapeHtml(tx.descricao)}</span>
+              ${tx.status === 'paga' ? '<span class="tag ok">Paga</span>' : '<span class="tag pend">Pendente</span>'}
+            </div>
+            <span class="taxa-valor">R$ ${Number(tx.valor).toFixed(2).replace('.', ',')}</span>
+            <div class="taxa-acoes">
               ${tx.status !== 'paga'
                 ? `<button class="tiny tag-ok-btn" onclick="marcarTaxaPaga('${tx.id}')">Marcar como paga</button>`
                 : ''}
               <button class="tiny remover" onclick="removerTaxa('${tx.id}')" title="Remover taxa">✕</button>
-            </td>
-          </tr>`).join('') || '<tr><td colspan="4" style="color:var(--ink-soft);">Nenhuma taxa gerada ainda.</td></tr>'}
-      </table>
+            </div>
+          </div>`).join('') || '<div class="empty">Nenhuma taxa gerada ainda.</div>'}
+      </div>
     </div>
 
     <div class="card">
@@ -2150,6 +2178,30 @@ async function removerEtapa(etapaId){
   aluno.etapas = (aluno.etapas || []).filter(e => e.id !== etapaId);
   await salvarDados();
   mostrarToast('Etapa removida.');
+  renderDetalheAluno();
+}
+
+/* Agrupa etapas pelo texto antes do "—" (ex.: "Curso teórico — Legislação de
+   trânsito" e "Curso teórico — Direção defensiva" caem no mesmo grupo
+   "Curso teórico"), pra permitir aplicar uma data a todas de uma vez. */
+function grupoDaEtapa(nome){
+  const idx = nome.indexOf(' — ');
+  return idx === -1 ? nome : nome.slice(0, idx);
+}
+
+async function aplicarDataEmLote(){
+  const data = document.getElementById('etapa-data-lote').value;
+  const grupo = document.getElementById('etapa-modalidade-lote').value;
+  if (!data){
+    mostrarToast('Escolha uma data antes de aplicar.');
+    return;
+  }
+  const aluno = getAlunoAtual();
+  (aluno.etapas || []).forEach(et => {
+    if (grupoDaEtapa(et.nome) === grupo) et.data = data;
+  });
+  await salvarDados();
+  mostrarToast(`Data aplicada a todas as etapas de "${grupo}".`);
   renderDetalheAluno();
 }
 
