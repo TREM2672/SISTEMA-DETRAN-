@@ -471,6 +471,24 @@ button.tiny:hover{ background:#FFF3DE; color:var(--ochre-dark); border-color: rg
   color: var(--navy-2); letter-spacing:0.01em;
 }
 
+.selo-consultor{
+  display:inline-flex; align-items:center; gap:9px;
+  background: #fff; border: 1.5px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 7px 16px 7px 8px;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow-sm);
+}
+.selo-consultor-avatar{
+  width:26px; height:26px; border-radius:50%;
+  background: linear-gradient(135deg, var(--navy-2), var(--navy));
+  color:#fff; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Sora', sans-serif; font-size:11px; font-weight:700;
+}
+.selo-consultor span{ font-size:12.5px; color: var(--ink-soft); }
+.selo-consultor strong{ font-family:'Sora', sans-serif; font-size:13px; color: var(--ink); font-weight:700; }
+
 .status-toggle{ display:flex; gap:10px; flex-wrap:wrap; }
 .status-btn{
   all:unset; cursor:pointer;
@@ -898,6 +916,11 @@ tr:last-child td{ border-bottom:none;}
 
     <!-- ===================== TELA: CONSULTA INTERNA ===================== -->
     <section class="screen active" id="screen-consulta">
+
+      <div class="selo-consultor" id="selo-consultor" style="display:none;">
+        <div class="selo-consultor-avatar" id="selo-consultor-avatar"></div>
+        <span>Consultor logado: <strong id="selo-consultor-nome"></strong></span>
+      </div>
 
       <div id="consulta-lista-view">
         <div class="consulta-central">
@@ -1554,6 +1577,24 @@ document.getElementById('btn-voltar-lista').addEventListener('click', () => {
 /* ============================================================
    SENHA DE CONSULTOR — exigida a cada consulta por CPF/nome
    ============================================================ */
+let consultorAtual = null;
+
+function iniciaisConsultor(nome){
+  const partes = nome.trim().split(/\s+/);
+  return ((partes[0]?.[0] || '') + (partes.length > 1 ? partes[partes.length - 1][0] : '')).toUpperCase();
+}
+
+function atualizarSeloConsultor(){
+  const selo = document.getElementById('selo-consultor');
+  if (!consultorAtual){
+    selo.style.display = 'none';
+    return;
+  }
+  document.getElementById('selo-consultor-nome').textContent = consultorAtual.nome;
+  document.getElementById('selo-consultor-avatar').textContent = iniciaisConsultor(consultorAtual.nome);
+  selo.style.display = 'inline-flex';
+}
+
 function pedirSenhaEBuscar(){
   const termoBruto = (document.getElementById('busca-aluno').value || '').trim();
   if (termoBruto === ''){
@@ -1591,6 +1632,8 @@ function abrirModalSenhaConsultor(onSuccess){
       return;
     }
     overlay.style.display = 'none';
+    consultorAtual = consultor;
+    atualizarSeloConsultor();
     mostrarToast(`Consulta liberada — consultor: ${consultor.nome}.`);
     onSuccess();
   };
