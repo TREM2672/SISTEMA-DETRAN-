@@ -8,10 +8,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --navy: #14508A;
-  --navy-2: #1B65AC;
-  --navy-deep: #0A2E52;
-  --govbar: #0A2E52;
+  --navy: #17539E;
+  --navy-2: #2E7BDB;
+  --navy-deep: #0B2F63;
+  --govbar: #0B2F63;
   --paper: #F3F6FA;
   --paper-2: #E9EEF4;
   --ochre: #F0A82E;
@@ -736,12 +736,20 @@ tr:last-child td{ border-bottom:none;}
       <div class="logo-mark" aria-hidden="true">
         <svg viewBox="0 0 40 40" fill="none">
           <defs>
-            <linearGradient id="logoGrad" x1="0" y1="0" x2="40" y2="40">
-              <stop offset="0" stop-color="#F0A82E"/>
-              <stop offset="1" stop-color="#D9860F"/>
+            <linearGradient id="logoGrad" x1="4" y1="2" x2="37" y2="38" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#FFC562"/>
+              <stop offset="0.55" stop-color="#F0A82E"/>
+              <stop offset="1" stop-color="#C6790C"/>
             </linearGradient>
+            <radialGradient id="logoGloss" cx="0.32" cy="0.22" r="0.75">
+              <stop offset="0" stop-color="#fff" stop-opacity="0.55"/>
+              <stop offset="0.5" stop-color="#fff" stop-opacity="0.08"/>
+              <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+            </radialGradient>
           </defs>
-          <rect width="40" height="40" rx="12" fill="url(#logoGrad)"/>
+          <rect width="40" height="40" rx="13" fill="url(#logoGrad)"/>
+          <rect width="40" height="40" rx="13" fill="url(#logoGloss)"/>
+          <rect x="1" y="1" width="38" height="38" rx="12" stroke="#fff" stroke-opacity="0.18"/>
           <circle cx="20" cy="20" r="10" stroke="#fff" stroke-width="2.3" fill="none"/>
           <circle cx="20" cy="20" r="2.6" fill="#fff"/>
           <path d="M20 8.5 V13 M20 27 V31.5 M8.5 20 H13 M27 20 H31.5" stroke="#fff" stroke-width="2.3" stroke-linecap="round"/>
@@ -1738,12 +1746,13 @@ function renderDetalheAluno(){
         <div class="detran-uf-badge">
           <svg viewBox="0 0 40 40" fill="none">
             <defs>
-              <linearGradient id="logoGradPeq" x1="0" y1="0" x2="40" y2="40">
-                <stop offset="0" stop-color="#F0A82E"/>
-                <stop offset="1" stop-color="#D9860F"/>
+              <linearGradient id="logoGradPeq" x1="4" y1="2" x2="37" y2="38" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#FFC562"/>
+                <stop offset="0.55" stop-color="#F0A82E"/>
+                <stop offset="1" stop-color="#C6790C"/>
               </linearGradient>
             </defs>
-            <rect width="40" height="40" rx="10" fill="url(#logoGradPeq)"/>
+            <rect width="40" height="40" rx="11" fill="url(#logoGradPeq)"/>
             <circle cx="20" cy="20" r="9" stroke="#fff" stroke-width="2" fill="none"/>
             <circle cx="20" cy="20" r="2.3" fill="#fff"/>
             <path d="M20 9.5 V13 M20 27 V30.5 M9.5 20 H13 M27 20 H30.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
