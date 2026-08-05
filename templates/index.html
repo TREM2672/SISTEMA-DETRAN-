@@ -889,7 +889,7 @@ tr:last-child td{ border-bottom:none;}
               <label for="f-cat">Categoria pretendida</label>
               <select id="f-cat">
                 <option>A</option><option selected>B</option><option>AB</option>
-                <option>C</option><option>D</option><option>E</option>
+                <option>C</option><option>D</option><option>E</option><option>AD</option>
               </select>
             </div>
             <div class="field">
@@ -1106,7 +1106,7 @@ const ETAPAS_VEICULO = [
 function etapasPorCategoria(categoria){
   if (categoria === 'A') return [...ETAPAS_COMUNS, ...ETAPAS_MOTO];
   if (categoria === 'B') return [...ETAPAS_COMUNS, ...ETAPAS_VEICULO];
-  if (categoria === 'AB') return [...ETAPAS_COMUNS, ...ETAPAS_MOTO, ...ETAPAS_VEICULO];
+  if (categoria === 'AB' || categoria === 'AD') return [...ETAPAS_COMUNS, ...ETAPAS_MOTO, ...ETAPAS_VEICULO];
   // C, D, E — categorias que exigem veículo (caminhão, ônibus, etc.)
   return [...ETAPAS_COMUNS, ...ETAPAS_VEICULO];
 }
