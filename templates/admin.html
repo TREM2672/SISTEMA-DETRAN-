@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel do administrador — DETRAN CFC</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2040%2040'%3E%3Crect%20width='40'%20height='40'%20rx='10'%20fill='%23F0A82E'/%3E%3Ccircle%20cx='20'%20cy='20'%20r='10'%20stroke='white'%20stroke-width='4'%20fill='none'/%3E%3Ccircle%20cx='20'%20cy='20'%20r='3'%20fill='white'/%3E%3Cpath%20d='M20%206v7M20%2027v7M6%2020h7M27%2020h7'%20stroke='white'%20stroke-width='4'%20stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+(function(){
+  const salvo = localStorage.getItem('tema');
+  const tema = salvo || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  document.documentElement.dataset.theme = tema;
+})();
+</script>
+<style>
+:root{
+  --navy: #12489A; --navy-2: #1E6FE8; --navy-deep: #081F44; --govbar: #081F44;
+  --paper: #FFFFFF; --paper-2: #F6F7F9; --surface: #FFFFFF;
+  --ochre: #F5A81E; --ochre-dark: #C6820F; --ochre-tint: #FBF0DC;
+  --ink: #16202E; --ink-soft: #5B6B82; --line: #DFE5EC;
+  --ok: #1E9B5E; --ok-bg: #E4F6EC; --pend: #D94F3D; --pend-bg: #FBEAE7;
+  --radius: 12px; --radius-sm: 8px; --radius-pill: 999px;
+  --shadow-sm: 0 1px 2px rgba(16,38,66,0.06); --shadow-md: 0 8px 24px rgba(16,38,66,0.08);
+}
+:root[data-theme="dark"]{
+  --navy: #4C8FE0; --navy-2: #6FA9F2; --navy-deep: #081F44; --govbar: #081F44;
+  --paper: #0E1420; --paper-2: #16202E; --surface: #131B29;
+  --ochre: #F2B54B; --ochre-dark: #F2C572; --ochre-tint: #3A2C10;
+  --ink: #EAF0F8; --ink-soft: #93A2B9; --line: rgba(255,255,255,0.12);
+  --ok: #3FCB8B; --ok-bg: rgba(63,203,139,0.14); --pend: #F17963; --pend-bg: rgba(241,121,99,0.14);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3); --shadow-md: 0 8px 24px rgba(0,0,0,0.35);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --navy: #4C8FE0; --navy-2: #6FA9F2; --navy-deep: #081F44; --govbar: #081F44;
+    --paper: #0E1420; --paper-2: #16202E; --surface: #131B29;
+    --ochre: #F2B54B; --ochre-dark: #F2C572; --ochre-tint: #3A2C10;
+    --ink: #EAF0F8; --ink-soft: #93A2B9; --line: rgba(255,255,255,0.12);
+    --ok: #3FCB8B; --ok-bg: rgba(63,203,139,0.14); --pend: #F17963; --pend-bg: rgba(241,121,99,0.14);
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.3); --shadow-md: 0 8px 24px rgba(0,0,0,0.35);
+  }
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{ background:var(--paper); color:var(--ink); font-family:'Inter',sans-serif; min-height:100vh; }
+.topo{
+  background: var(--govbar); color:#C9D2DE; padding:14px 28px; display:flex; align-items:center; gap:12px;
+  font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.04em;
+}
+.topo strong{ color:#fff; font-family:'Sora',sans-serif; font-size:13px; letter-spacing:0.02em; }
+.wrap{ max-width:960px; margin:0 auto; padding:36px 24px 70px; }
+h1{ font-family:'Sora',sans-serif; font-size:26px; font-weight:800; letter-spacing:-0.01em; margin:0 0 6px; }
+.subhead{ color:var(--ink-soft); font-size:13.5px; margin:0 0 28px; }
+.card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:24px 26px; box-shadow:var(--shadow-sm); margin-bottom:20px; }
+table{ width:100%; border-collapse:collapse; }
+th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.03em; color:var(--ink-soft); padding:8px; border-bottom:1px solid var(--line); }
+td{ padding:11px 8px; border-bottom:1px solid var(--paper-2); font-size:13.5px; vertical-align:middle; }
+tr:last-child td{ border-bottom:none; }
+.meta{ font-size:12px; }
+.meta-ip{ display:block; font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--ink-soft); margin-top:1px; }
+.badge-admin{
+  display:inline-block; padding:3px 10px; border-radius:999px; font-size:10.5px; font-weight:700;
+  background:var(--ochre-tint); color:var(--ochre-dark); margin-left:8px;
+}
+button{ font-family:inherit; cursor:pointer; }
+button.tiny{
+  border:1px solid var(--line); background:var(--paper-2); color:var(--ink); font-size:11.5px; font-weight:700;
+  padding:6px 12px; border-radius:999px; margin-right:6px;
+}
+button.tiny.perigo{ background:var(--pend-bg); color:var(--pend); border-color:transparent; }
+button.tiny.ok{ background:var(--ok-bg); color:var(--ok); border-color:transparent; }
+button.tiny:hover{ filter:brightness(0.97); }
+.voltar{
+  display:inline-flex; align-items:center; gap:6px; color:var(--navy-2); text-decoration:none;
+  font-size:13px; font-weight:600; margin-bottom:18px;
+}
+.voltar:hover{ text-decoration:underline; }
+.restrito{ text-align:center; padding:80px 20px; }
+.restrito h1{ margin-bottom:10px; }
+.restrito p{ color:var(--ink-soft); margin-bottom:22px; }
+.restrito a{
+  display:inline-block; background:linear-gradient(180deg, var(--navy-2), var(--navy)); color:#fff;
+  padding:11px 24px; border-radius:999px; text-decoration:none; font-weight:700; font-size:13.5px;
+}
+#carregando{ text-align:center; padding:60px 20px; color:var(--ink-soft); }
+</style>
+</head>
+<body>
+<div class="topo"><strong>DETRAN</strong> · Painel de administração</div>
+<div class="wrap">
+  <div id="carregando">Carregando…</div>
+  <div id="conteudo-restrito" style="display:none;"></div>
+  <div id="conteudo-admin" style="display:none;">
+    <a class="voltar" href="/">← Voltar ao sistema</a>
+    <h1>Painel de administração</h1>
+    <p class="subhead">Todos os consultores com acesso ao sistema, quando se cadastraram e o IP de cada acesso. Visível só pra quem é administrador.</p>
+
+    <div class="card">
+      <table>
+        <tr><th>Nome</th><th>Cadastrado em</th><th>Último acesso</th><th></th></tr>
+        <tbody id="tabela-usuarios"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+function formatarDataHora(iso){
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+}
+function escapeHtml(s){
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+let euId = null;
+
+async function carregarUsuarios(){
+  const res = await fetch('/api/admin/consultores');
+  if (!res.ok){
+    document.getElementById('carregando').textContent = 'Não foi possível carregar os usuários.';
+    return;
+  }
+  const json = await res.json();
+  const tbody = document.getElementById('tabela-usuarios');
+  tbody.innerHTML = json.consultores.map(c => `
+    <tr>
+      <td>${escapeHtml(c.nome)}${c.admin ? '<span class="badge-admin">Administrador</span>' : ''}</td>
+      <td class="meta">${formatarDataHora(c.criado_em)}${c.criado_ip ? `<span class="meta-ip">${escapeHtml(c.criado_ip)}</span>` : ''}</td>
+      <td class="meta">${formatarDataHora(c.ultimo_login_em)}${c.ultimo_login_ip ? `<span class="meta-ip">${escapeHtml(c.ultimo_login_ip)}</span>` : ''}</td>
+      <td style="white-space:nowrap;">
+        ${c.admin
+          ? (c.id !== euId ? `<button class="tiny perigo" onclick="alternarAdmin('${c.id}', false)">Remover admin</button>` : '')
+          : `<button class="tiny ok" onclick="alternarAdmin('${c.id}', true)">Tornar admin</button>`}
+        ${c.id !== euId ? `<button class="tiny perigo" onclick="removerUsuario('${c.id}')">Excluir</button>` : ''}
+      </td>
+    </tr>`).join('');
+}
+
+async function alternarAdmin(id, tornarAdmin){
+  const res = await fetch(`/api/admin/consultores/${id}/admin`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ admin: tornarAdmin }),
+  });
+  const json = await res.json();
+  if (!json.ok){ alert(json.erro || 'Não foi possível alterar.'); return; }
+  carregarUsuarios();
+}
+
+async function removerUsuario(id){
+  if (!confirm('Remover o acesso desse usuário? Ele não vai conseguir mais entrar no sistema.')) return;
+  const res = await fetch('/api/admin/consultores');
+  const json = await res.json();
+  const restantes = json.consultores.filter(c => c.id !== id);
+  await fetch('/api/consultores', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ consultores: restantes }),
+  });
+  carregarUsuarios();
+}
+
+(async function iniciar(){
+  try{
+    const res = await fetch('/api/sessao');
+    const s = await res.json();
+    if (!s.logado){
+      document.getElementById('carregando').style.display = 'none';
+      document.getElementById('conteudo-restrito').style.display = 'block';
+      document.getElementById('conteudo-restrito').innerHTML = `
+        <div class="restrito">
+          <h1>Faça login primeiro</h1>
+          <p>Você precisa estar logado no sistema pra acessar o painel de administração.</p>
+          <a href="/">Ir para o login</a>
+        </div>`;
+      return;
+    }
+    if (!s.usuario.admin){
+      document.getElementById('carregando').style.display = 'none';
+      document.getElementById('conteudo-restrito').style.display = 'block';
+      document.getElementById('conteudo-restrito').innerHTML = `
+        <div class="restrito">
+          <h1>Acesso restrito</h1>
+          <p>Essa área é só para o administrador do sistema. Fale com quem cadastrou você caso precise de acesso.</p>
+          <a href="/">← Voltar ao sistema</a>
+        </div>`;
+      return;
+    }
+    euId = s.usuario.id;
+    document.getElementById('carregando').style.display = 'none';
+    document.getElementById('conteudo-admin').style.display = 'block';
+    await carregarUsuarios();
+  } catch(e){
+    console.error(e);
+    document.getElementById('carregando').textContent = 'Não foi possível conectar ao servidor.';
+  }
+})();
+</script>
+</body>
+</html>
