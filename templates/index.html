@@ -4,21 +4,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DETRAN — Prontuário Digital do CFC</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2040%2040'%3E%3Crect%20width='40'%20height='40'%20rx='10'%20fill='%23F0A82E'/%3E%3Ccircle%20cx='20'%20cy='20'%20r='10'%20stroke='white'%20stroke-width='4'%20fill='none'/%3E%3Ccircle%20cx='20'%20cy='20'%20r='3'%20fill='white'/%3E%3Cpath%20d='M20%206v7M20%2027v7M6%2020h7M27%2020h7'%20stroke='white'%20stroke-width='4'%20stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+// aplica o tema salvo antes da 1ª pintura da página, pra não piscar o tema errado
+(function(){
+  const salvo = localStorage.getItem('tema');
+  const tema = salvo || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  document.documentElement.dataset.theme = tema;
+})();
+</script>
 <style>
 :root{
-  --navy: #17539E;
-  --navy-2: #2E7BDB;
-  --navy-deep: #0B2F63;
-  --govbar: #0B2F63;
-  --paper: #F3F6FA;
-  --paper-2: #E9EEF4;
-  --ochre: #F0A82E;
+  --navy: #12489A;
+  --navy-2: #1E6FE8;
+  --navy-deep: #081F44;
+  --govbar: #081F44;
+  --paper: #FFFFFF;
+  --paper-2: #F6F7F9;
+  --surface: #FFFFFF;
+  --ochre: #F5A81E;
   --ochre-dark: #C6820F;
+  --ochre-tint: #FBF0DC;
   --verde: #1E9B5E;
   --ink: #16202E;
-  --ink-soft: #64738A;
+  --ink-soft: #5B6B82;
   --line: #DFE5EC;
   --ok: #1E9B5E;
   --ok-bg: #E4F6EC;
@@ -30,14 +41,62 @@
   --shadow-sm: 0 1px 2px rgba(16,38,66,0.06), 0 1px 1px rgba(16,38,66,0.04);
   --shadow-md: 0 8px 24px rgba(16,38,66,0.08), 0 2px 6px rgba(16,38,66,0.04);
   --shadow-lg: 0 16px 40px rgba(16,38,66,0.14);
+  --select-arrow: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%235B6B82'%20stroke-width='2'%3E%3Cpath%20d='M6%209l6%206%206-6'/%3E%3C/svg%3E");
+}
+:root[data-theme="dark"]{
+  --navy: #4C8FE0;
+  --navy-2: #6FA9F2;
+  --navy-deep: #081F44;
+  --govbar: #081F44;
+  --paper: #0E1420;
+  --paper-2: #16202E;
+  --surface: #131B29;
+  --ochre: #F2B54B;
+  --ochre-dark: #F2C572;
+  --ochre-tint: #3A2C10;
+  --verde: #3FCB8B;
+  --ink: #EAF0F8;
+  --ink-soft: #93A2B9;
+  --line: rgba(255,255,255,0.12);
+  --ok: #3FCB8B;
+  --ok-bg: rgba(63,203,139,0.14);
+  --pend: #F17963;
+  --pend-bg: rgba(241,121,99,0.14);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.25);
+  --shadow-lg: 0 16px 40px rgba(0,0,0,0.5);
+  --select-arrow: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%2393A2B9'%20stroke-width='2'%3E%3Cpath%20d='M6%209l6%206%206-6'/%3E%3C/svg%3E");
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --navy: #4C8FE0;
+    --navy-2: #6FA9F2;
+    --navy-deep: #081F44;
+    --govbar: #081F44;
+    --paper: #0E1420;
+    --paper-2: #16202E;
+    --surface: #131B29;
+    --ochre: #F2B54B;
+    --ochre-dark: #F2C572;
+    --ochre-tint: #3A2C10;
+    --verde: #3FCB8B;
+    --ink: #EAF0F8;
+    --ink-soft: #93A2B9;
+    --line: rgba(255,255,255,0.12);
+    --ok: #3FCB8B;
+    --ok-bg: rgba(63,203,139,0.14);
+    --pend: #F17963;
+    --pend-bg: rgba(241,121,99,0.14);
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-md: 0 8px 24px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.25);
+    --shadow-lg: 0 16px 40px rgba(0,0,0,0.5);
+    --select-arrow: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%2393A2B9'%20stroke-width='2'%3E%3Cpath%20d='M6%209l6%206%206-6'/%3E%3C/svg%3E");
+  }
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
 body{
-  background:
-    radial-gradient(circle at 15% 0%, rgba(20,80,138,0.05), transparent 40%),
-    radial-gradient(circle at 100% 100%, rgba(240,168,46,0.05), transparent 45%),
-    var(--paper);
+  background: var(--paper);
   color: var(--ink);
   font-family: 'Inter', sans-serif;
   min-height: 100vh;
@@ -137,6 +196,21 @@ nav{display:flex; flex-direction:column; gap:6px;}
   color:#5E6B82; line-height:1.6;
 }
 
+.theme-toggle{
+  all:unset; cursor:pointer; margin-top:16px; box-sizing:border-box;
+  display:flex; align-items:center; gap:10px; width:100%;
+  padding:10px 12px; border-radius: var(--radius-sm);
+  color:#C9C4B4; font-size:12.5px; font-weight:600;
+  border: 1px solid rgba(233,228,216,0.18);
+  transition: background .15s ease, color .15s ease;
+}
+.theme-toggle:hover{ background: rgba(255,255,255,0.08); color:#fff; }
+.theme-toggle:focus-visible{ outline: 2px solid var(--ochre); outline-offset:2px; }
+.theme-toggle svg{ width:15px; height:15px; flex-shrink:0; }
+.theme-toggle .icone-lua{ display:none; }
+:root[data-theme="dark"] .theme-toggle .icone-sol{ display:none; }
+:root[data-theme="dark"] .theme-toggle .icone-lua{ display:block; }
+
 /* ---------- Main ---------- */
 main{flex:1; padding: 40px 44px 60px; max-width: 900px; margin: 0 auto; width:100%;}
 .screen{display:none;}
@@ -157,7 +231,7 @@ h1{
 }
 
 .card{
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 26px 28px;
@@ -179,6 +253,31 @@ h1{
 .card-header-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
 .card-header-row .card-note{ margin-bottom:0; }
 
+.storage-status{
+  display:flex; align-items:flex-start; gap:12px;
+  border-radius: var(--radius); padding: 14px 16px; margin-bottom:20px;
+  border: 1px solid var(--line);
+}
+.storage-status.ok{ background: var(--ok-bg); border-color: color-mix(in srgb, var(--ok) 35%, transparent); }
+.storage-status.warn{ background: var(--pend-bg); border-color: color-mix(in srgb, var(--pend) 35%, transparent); }
+.storage-status.loading{ background: var(--paper-2); }
+.storage-status svg{ width:18px; height:18px; flex-shrink:0; margin-top:1px; }
+.storage-status.ok svg{ color: var(--ok); }
+.storage-status.warn svg{ color: var(--pend); }
+.storage-status.loading svg{ color: var(--ink-soft); animation: girar 1s linear infinite; }
+.storage-status .t{ font-size:13px; font-weight:700; margin-bottom:2px; }
+.storage-status.ok .t{ color: var(--ok); }
+.storage-status.warn .t{ color: var(--pend); }
+.storage-status.loading .t{ color: var(--ink-soft); font-weight:600; }
+.storage-status .d{ font-size:12.5px; color: var(--ink-soft); }
+.storage-status code{ font-family:'JetBrains Mono', monospace; font-size:11.5px; background: rgba(0,0,0,0.05); padding:1px 5px; border-radius:4px; }
+
+.carregando-linha, .carregando-lista{ color: var(--ink-soft); }
+@keyframes girar{ to{ transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce){
+  .storage-status.loading svg{ animation: none; }
+}
+
 /* forms */
 .grid{ display:grid; grid-template-columns: 1fr 1fr; gap:14px 18px;}
 .field{ display:flex; flex-direction:column; gap:5px;}
@@ -190,13 +289,22 @@ input, select{
   padding: 10px 12px;
   border: 1.5px solid var(--line);
   border-radius: var(--radius-sm);
-  background: var(--paper);
+  background: var(--surface);
   color: var(--ink);
   transition: border-color .15s ease, box-shadow .15s ease;
 }
 input:focus, select:focus{
   border-color: var(--navy-2);
   box-shadow: 0 0 0 3px rgba(27,101,172,0.14);
+}
+select{
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: var(--select-arrow);
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 15px;
+  padding-right: 34px;
 }
 button:focus-visible, .nav-btn:focus-visible{
   outline: 2px solid var(--ochre);
@@ -233,7 +341,7 @@ button.primary{
 button.primary:hover{ transform: translateY(-1px); box-shadow: 0 1px 0 rgba(255,255,255,0.12) inset, 0 10px 22px rgba(10,46,82,0.4); filter: brightness(1.04); }
 button.primary:active{ transform: translateY(0); box-shadow: 0 2px 6px rgba(10,46,82,0.3) inset; }
 
-button.secondary{
+button.secondary, a.secondary{
   all:unset; cursor:pointer;
   border: 1.5px solid var(--line);
   padding: 8px 16px;
@@ -241,12 +349,12 @@ button.secondary{
   font-size: 12.5px;
   font-weight:600;
   color: var(--ink);
-  background: linear-gradient(180deg, #fff, #FAFBFC);
+  background: linear-gradient(180deg, var(--surface), var(--paper-2));
   box-shadow: 0 1px 2px rgba(16,38,66,0.04);
   transition: border-color .15s ease, color .15s ease, box-shadow .15s ease, transform .1s ease;
 }
-button.secondary:hover{ border-color: var(--ochre); color:var(--ochre-dark); box-shadow: 0 2px 8px rgba(16,38,66,0.08); }
-button.secondary:active{ transform: translateY(1px); }
+button.secondary:hover, a.secondary:hover{ border-color: var(--ochre); color:var(--ochre-dark); box-shadow: 0 2px 8px rgba(16,38,66,0.08); }
+button.secondary:active, a.secondary:active{ transform: translateY(1px); }
 
 button.perigo{
   all:unset; cursor:pointer;
@@ -274,7 +382,7 @@ button.tiny{
   border: 1px solid transparent;
   transition: background .15s ease, color .15s ease, border-color .15s ease;
 }
-button.tiny:hover{ background:#FFF3DE; color:var(--ochre-dark); border-color: rgba(240,168,46,0.4); }
+button.tiny:hover{ background: var(--ochre-tint); color:var(--ochre-dark); border-color: rgba(240,168,46,0.4); }
 
 /* consulta: busca + lista */
 .search-row{ display:flex; gap:10px; margin-bottom:8px;}
@@ -289,7 +397,7 @@ button.tiny:hover{ background:#FFF3DE; color:var(--ochre-dark); border-color: rg
   border:1px solid var(--line);
   border-radius: var(--radius-sm);
   cursor:pointer;
-  background:#fff;
+  background: var(--surface);
   box-shadow: var(--shadow-sm);
   transition: box-shadow .15s ease, transform .12s ease, border-color .15s ease;
 }
@@ -306,18 +414,59 @@ button.tiny:hover{ background:#FFF3DE; color:var(--ochre-dark); border-color: rg
 .aluno-item-excluir:hover{ background: var(--pend-bg); color: var(--pend); }
 
 .consulta-atalho{ text-align:center; margin-top:16px; }
+.trust-strip{
+  display:flex; flex-wrap:wrap; justify-content:center; gap:8px;
+  margin-top:22px; padding-top:20px; border-top:1px dashed var(--line);
+}
+.trust-badge{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 12px; border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--ok) 9%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--ok) 22%, var(--line));
+  color: var(--ok); font-size:11.5px; font-weight:700;
+  cursor:default;
+}
+.trust-badge svg{ width:14px; height:14px; flex-shrink:0; }
+.trust-badge span{ color: var(--ink-soft); font-weight:600; }
+
+/* ---- painel de gestão ---- */
+.painel-stats{ display:grid; grid-template-columns: repeat(4, 1fr); gap:14px; margin-bottom:22px; }
+@media (max-width:760px){ .painel-stats{ grid-template-columns: repeat(2, 1fr); } }
+.painel-stat{
+  background: var(--surface); border:1px solid var(--line); border-radius: var(--radius);
+  padding:18px 18px 16px; box-shadow: var(--shadow-sm);
+}
+.painel-stat .n{
+  font-family:'Sora', sans-serif; font-size:26px; font-weight:800; letter-spacing:-0.01em;
+  font-variant-numeric: tabular-nums; line-height:1; color: var(--ink);
+}
+.painel-stat .l{ font-size:12px; color: var(--ink-soft); margin-top:6px; }
+.painel-stat.ok .n{ color: var(--ok); }
+.painel-stat.pend .n{ color: var(--pend); }
+
+.painel-barra-lista{ display:flex; flex-direction:column; gap:14px; }
+.painel-barra-item{ display:flex; flex-direction:column; gap:6px; }
+.painel-barra-topo{ display:flex; justify-content:space-between; font-size:13px; }
+.painel-barra-topo span:first-child{ font-weight:600; color: var(--ink); }
+.painel-barra-topo span:last-child{ color: var(--ink-soft); font-variant-numeric: tabular-nums; font-family:'JetBrains Mono', monospace; }
+.painel-barra-trilho{ height:8px; border-radius:999px; background: var(--paper-2); overflow:hidden; }
+.painel-barra-fill{ height:100%; border-radius:999px; transition: width .4s ease; }
+.painel-barra-fill.regular{ background: var(--ok); }
+.painel-barra-fill.pendente{ background: var(--ochre); }
+.painel-barra-fill.irregular{ background: var(--pend); }
+.painel-barra-fill.neutro{ background: linear-gradient(90deg, var(--navy-2), var(--navy)); }
 .empty{
   text-align:center; padding: 48px 20px; color: var(--ink-soft); font-size:14px;
   border: 1.5px dashed var(--line); border-radius: var(--radius);
 }
-.empty.aguardando-busca{ background: #fff; }
+.empty.aguardando-busca{ background: var(--surface); }
 .empty.aguardando-busca svg{ width:30px; height:30px; opacity:.4; margin-bottom:10px; }
 .empty.aguardando-busca p{ margin:0; }
 
 .carregando-busca{
   text-align:center; padding: 48px 20px; color: var(--ink-soft); font-size:14px;
   border: 1.5px dashed var(--line); border-radius: var(--radius);
-  background:#fff;
+  background: var(--surface);
 }
 .carregando-busca p{ margin: 14px 0 0 0; font-family:'JetBrains Mono', monospace; font-size:12.5px; }
 .spinner{
@@ -371,17 +520,22 @@ button.tiny:hover{ background:#FFF3DE; color:var(--ochre-dark); border-color: rg
 .btn-ajustar-foto svg{ width:14px; height:14px; }
 .alerta-regularizacao{
   display:flex; align-items:flex-start; gap:14px;
-  background: #FDECEA;
-  border: 1.5px solid #F1B3AB;
-  color: var(--pend);
-  border-radius: var(--radius-sm);
-  padding: 14px 18px;
+  background: var(--pend-bg);
+  border: 1.5px solid color-mix(in srgb, var(--pend) 32%, transparent);
+  border-radius: var(--radius);
+  padding: 16px 20px;
   margin-bottom: 20px;
-  box-shadow: 0 4px 14px rgba(217,79,61,0.12);
+  box-shadow: var(--shadow-sm);
 }
-.alerta-regularizacao svg{ width:22px; height:22px; flex-shrink:0; margin-top:1px; }
-.alerta-regularizacao strong{ display:block; font-size:14px; font-family:'Sora', sans-serif; color: #7A2A1F; margin-bottom:2px; }
-.alerta-regularizacao span{ font-size:12.5px; color: var(--pend); line-height:1.5; }
+.alerta-regularizacao-icone{
+  width:36px; height:36px; border-radius:50%; flex-shrink:0;
+  background: color-mix(in srgb, var(--pend) 16%, transparent);
+  display:flex; align-items:center; justify-content:center;
+  color: var(--pend);
+}
+.alerta-regularizacao-icone svg{ width:19px; height:19px; }
+.alerta-regularizacao strong{ display:block; font-size:14px; font-family:'Sora', sans-serif; color: var(--pend); margin-bottom:3px; }
+.alerta-regularizacao span{ font-size:12.5px; color: var(--ink-soft); line-height:1.5; }
 
 .resultado-consulta{
   display:flex; align-items:center; gap:16px;
@@ -417,7 +571,7 @@ button.tiny:hover{ background:#FFF3DE; color:var(--ochre-dark); border-color: rg
   z-index:100; padding:20px;
 }
 .modal-box{
-  background:#fff; border-radius: var(--radius);
+  background: var(--surface); border-radius: var(--radius);
   padding: 26px; width: 100%; max-width: 380px;
   box-shadow: var(--shadow-lg);
 }
@@ -443,7 +597,7 @@ button.tiny:hover{ background:#FFF3DE; color:var(--ochre-dark); border-color: rg
 .modal-actions{ display:flex; justify-content:flex-end; gap:10px; }
 
 .situacao-regular{ background: var(--ok-bg); color: var(--ok); }
-.situacao-pendente{ background: #FBF0DC; color: var(--ochre-dark); }
+.situacao-pendente{ background: var(--ochre-tint); color: var(--ochre-dark); }
 .situacao-irregular{ background: var(--pend-bg); color: var(--pend); }
 .foto-trocar{ margin-top:4px; }
 .foto-trocar input{ font-size:11.5px; }
@@ -471,26 +625,26 @@ button.tiny:hover{ background:#FFF3DE; color:var(--ochre-dark); border-color: rg
   color: var(--navy-2); letter-spacing:0.01em;
 }
 
+.consulta-topbar{
+  max-width: 520px; margin: 0 auto 18px; min-height: 1px;
+  display:flex; justify-content:flex-end;
+}
 .selo-consultor{
-  position: fixed;
-  top: 44px;
-  right: 24px;
-  z-index: 40;
   display:inline-flex; align-items:center; gap:14px;
-  background: #fff; border: 1.5px solid var(--line);
+  background: var(--surface); border: 1.5px solid var(--line);
   border-radius: var(--radius-pill);
-  padding: 12px 28px 12px 14px;
-  box-shadow: var(--shadow-md);
+  padding: 10px 24px 10px 12px;
+  box-shadow: var(--shadow-sm);
 }
 .selo-consultor-avatar{
-  width:46px; height:46px; border-radius:50%;
+  width:42px; height:42px; border-radius:50%;
   background: linear-gradient(135deg, var(--navy-2), var(--navy));
   color:#fff; flex-shrink:0;
   display:flex; align-items:center; justify-content:center;
-  font-family:'Sora', sans-serif; font-size:17px; font-weight:700;
+  font-family:'Sora', sans-serif; font-size:16px; font-weight:700;
 }
-.selo-consultor span{ font-size:14.5px; color: var(--ink-soft); }
-.selo-consultor strong{ font-family:'Sora', sans-serif; font-size:19px; color: var(--ink); font-weight:700; display:block; }
+.selo-consultor span{ font-size:13.5px; color: var(--ink-soft); }
+.selo-consultor strong{ font-family:'Sora', sans-serif; font-size:18px; color: var(--ink); font-weight:700; display:block; }
 
 .status-toggle{ display:flex; gap:10px; flex-wrap:wrap; }
 .status-btn{
@@ -501,7 +655,7 @@ button.tiny:hover{ background:#FFF3DE; color:var(--ochre-dark); border-color: rg
   border: 1.5px solid var(--line);
   font-size: 13.5px; font-weight:600;
   color: var(--ink-soft);
-  background:#fff;
+  background: var(--surface);
   box-shadow: 0 1px 2px rgba(16,38,66,0.04);
   transition: all .15s ease;
 }
@@ -528,7 +682,7 @@ button.tiny:hover{ background:#FFF3DE; color:var(--ochre-dark); border-color: rg
   box-shadow: var(--shadow-sm);
 }
 .dado-item{
-  background:#fff;
+  background: var(--surface);
   padding: 16px 14px 16px 20px;
   display:flex; flex-direction:column; gap:8px;
   position:relative;
@@ -573,35 +727,40 @@ button.tiny:hover{ background:#FFF3DE; color:var(--ochre-dark); border-color: rg
 
 .consulta-central{ max-width: 520px; margin: 0 auto 28px auto; text-align:center; }
 .consulta-header{ display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:24px; }
-.consulta-icone{
-  width:56px; height:56px; border-radius: 50%; flex-shrink:0;
-  background: linear-gradient(135deg, var(--navy-2), var(--navy));
-  color:#fff;
-  display:flex; align-items:center; justify-content:center;
-  box-shadow: 0 8px 20px rgba(20,80,138,0.28);
-  margin-bottom:4px;
+.consulta-logo{
+  width:68px; height:68px; margin: 0 auto 10px;
+  filter: drop-shadow(0 8px 18px rgba(23,83,158,0.22));
 }
-.consulta-icone svg{ width:24px; height:24px; }
+.consulta-logo svg{ width:100%; height:100%; }
+.consulta-wordmark{
+  font-family:'Sora', sans-serif;
+  font-size:21px; font-weight:800; letter-spacing:0.04em;
+  color: var(--navy-deep); line-height:1;
+}
+.consulta-rule{
+  width:56px; height:3px; border-radius:2px; margin:14px auto 20px;
+  background: linear-gradient(90deg, var(--ochre), var(--navy-2));
+}
 .consulta-header h1{ margin-bottom:2px; }
 .consulta-header .subhead{ max-width: 380px; }
 
 .search-bar-pro{
   display:flex; align-items:center; gap:10px;
-  background:#fff;
+  background: var(--surface);
   border: 1.5px solid var(--line);
   border-radius: var(--radius-pill);
-  padding: 6px 8px 6px 20px;
-  box-shadow: var(--shadow-md);
+  padding: 8px 10px 8px 22px;
+  box-shadow: var(--shadow-lg);
   transition: border-color .15s ease, box-shadow .15s ease;
 }
-.search-bar-pro:focus-within{ border-color: var(--navy-2); box-shadow: 0 0 0 4px rgba(27,101,172,0.12), var(--shadow-md); }
-.search-bar-pro svg{ width:18px; height:18px; color: var(--ink-soft); flex-shrink:0; }
+.search-bar-pro:focus-within{ border-color: var(--navy-2); box-shadow: 0 0 0 4px rgba(27,101,172,0.14), var(--shadow-lg); }
+.search-bar-pro svg{ width:19px; height:19px; color: var(--ink-soft); flex-shrink:0; }
 .search-bar-pro input{
-  flex:1; border:none; background:transparent; padding: 10px 0;
-  font-size:14.5px;
+  flex:1; border:none; background:transparent; padding: 12px 0;
+  font-size:15.5px;
 }
 .search-bar-pro input:focus{ box-shadow:none; outline:none; }
-.search-bar-pro button.primary{ margin-top:0; padding: 11px 24px; white-space:nowrap; }
+.search-bar-pro button.primary{ margin-top:0; padding: 13px 26px; white-space:nowrap; }
 .search-feedback{ text-align:center; }
 
 .etapas-toolbar{ margin-bottom:14px; }
@@ -614,15 +773,24 @@ button.tiny.remover{ background: var(--pend-bg); color: var(--pend); font-weight
 
 .taxas-lista{ display:flex; flex-direction:column; gap:10px; margin-top:16px; }
 .taxa-item{
-  display:flex; align-items:center; gap:18px;
-  padding: 14px 18px;
-  border-radius: var(--radius-sm);
+  display:flex; align-items:center; gap:14px;
+  padding: 12px 16px;
+  border-radius: var(--radius);
   border: 1.5px solid var(--line);
-  background:#fff;
+  background: var(--surface);
   box-shadow: var(--shadow-sm);
+  transition: box-shadow .15s ease, transform .12s ease;
 }
-.taxa-item.pendente{ border-color: rgba(217,79,61,0.28); }
-.taxa-item.paga{ border-color: rgba(30,155,94,0.25); background: var(--ok-bg); }
+.taxa-item:hover{ box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.taxa-item.pendente{ border-color: color-mix(in srgb, var(--pend) 30%, var(--line)); }
+.taxa-item.paga{ border-color: color-mix(in srgb, var(--ok) 28%, var(--line)); background: var(--ok-bg); }
+.taxa-icone{
+  width:38px; height:38px; border-radius:11px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.taxa-icone svg{ width:18px; height:18px; }
+.taxa-icone.pend{ background: var(--pend-bg); color: var(--pend); }
+.taxa-icone.ok{ background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
 .taxa-info{ flex:1; display:flex; align-items:center; gap:10px; min-width:0; }
 .taxa-descricao{ font-weight:600; font-size:14px; color:var(--ink); overflow-wrap:anywhere; }
 .taxa-valor{
@@ -630,6 +798,7 @@ button.tiny.remover{ background: var(--pend-bg); color: var(--pend); font-weight
   color:var(--ink); white-space:nowrap;
 }
 .taxa-acoes{ display:flex; align-items:center; gap:8px; flex-shrink:0; }
+button.tiny.tag-ok-btn{ display:inline-flex; align-items:center; gap:5px; }
 button.tiny.remover:hover{ background: var(--pend); color: #fff; }
 
 /* selo de status (elemento assinatura) */
@@ -637,7 +806,7 @@ button.tiny.remover:hover{ background: var(--pend); color: #fff; }
   display:flex; align-items:center; gap:16px;
   padding: 20px 22px;
   border-radius: var(--radius);
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--line);
   box-shadow: var(--shadow-md);
   margin-bottom:20px;
@@ -678,7 +847,7 @@ tr:last-child td{ border-bottom:none;}
 }
 .tag.ok{ background:var(--ok-bg); color:var(--ok); }
 .tag.pend{ background:var(--pend-bg); color:var(--pend); }
-.tag.pendente-amarelo{ background: #FBF0DC; color: var(--ochre-dark); }
+.tag.pendente-amarelo{ background: var(--ochre-tint); color: var(--ochre-dark); }
 
 .inline-form{ display:flex; gap:6px; align-items:center; flex-wrap:wrap;}
 .inline-form select, .inline-form input{ padding:6px 8px; font-size:12.5px;}
@@ -697,7 +866,7 @@ tr:last-child td{ border-bottom:none;}
 }
 .mini-field input, .mini-field select{
   padding: 8px 10px; font-size:13px; border:1.5px solid var(--line); border-radius: var(--radius-sm);
-  background:#fff; font-family:'Inter', sans-serif;
+  background: var(--surface); font-family:'Inter', sans-serif;
 }
 .mini-field input[type=number]{ width:88px; }
 .mini-field input[type=text]{ width:150px; }
@@ -719,11 +888,16 @@ tr:last-child td{ border-bottom:none;}
   z-index: 50;
 }
 .toast.show{ opacity:1; transform:translateY(0); }
+.toast.success{ background: linear-gradient(180deg, #29B074, var(--ok)); }
+.toast.error{ background: linear-gradient(180deg, #E15C49, var(--pend)); }
+.toast.success::before{ content:'✓  '; }
+.toast.error::before{ content:'⚠  '; }
 
 .back-link{
   all:unset; cursor:pointer; color:var(--ink-soft); font-size:13px; font-weight:600;
-  margin-bottom:16px; display:inline-flex; align-items:center; gap:6px;
+  display:inline-flex; align-items:center; gap:6px;
 }
+.detalhe-toolbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; gap:12px; }
 .back-link:hover{ color:var(--ochre-dark); }
 
 /* zona de risco: ação destrutiva, mantida discreta pra não competir com o resto da tela */
@@ -742,6 +916,21 @@ tr:last-child td{ border-bottom:none;}
   nav{flex-direction:row;}
   main{padding:22px;}
   .grid{grid-template-columns:1fr;}
+}
+
+@media print{
+  /* impressão sempre sai clara e legível, mesmo com o modo escuro ativado na tela */
+  :root, :root[data-theme="dark"]{
+    --paper:#fff; --paper-2:#f5f6f7; --surface:#fff;
+    --ink:#16202E; --ink-soft:#5B6B82; --line:#ccc;
+  }
+  .govbar, .sidebar, .detalhe-toolbar, .selo-consultor, .consulta-topbar,
+  .toast, .no-print, button, .search-bar-pro, .consulta-atalho{ display:none !important; }
+  .app{ display:block; min-height:0; }
+  main{ padding:0; max-width:100%; margin:0; }
+  body{ background:#fff; color:#16202E; }
+  .card, .card-perfil, .dados-grid, .resultado-consulta{ box-shadow:none !important; border-color:#ddd !important; }
+  input, select, textarea{ border-color:#ccc !important; color:#000; }
 }
 </style>
 </head>
@@ -786,6 +975,10 @@ tr:last-child td{ border-bottom:none;}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
         Consulta interna (CPF)
       </button>
+      <button class="nav-btn" data-screen="painel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V10M11 19V5M18 19v-7"/></svg>
+        Painel de gestão
+      </button>
       <button class="nav-btn" data-screen="novo">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
         Novo prontuário
@@ -800,6 +993,12 @@ tr:last-child td{ border-bottom:none;}
       2h de prática mínima · sem carga teórica mínima
       <div class="sidebar-protocolo">PRE — Processo Eletrônico<br>de Registro do Condutor</div>
     </div>
+
+    <button class="theme-toggle" type="button" id="theme-toggle" title="Alternar tema claro/escuro">
+      <svg class="icone-sol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <svg class="icone-lua" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg>
+      <span id="theme-toggle-label">Modo escuro</span>
+    </button>
   </aside>
 
   <main>
@@ -920,17 +1119,40 @@ tr:last-child td{ border-bottom:none;}
     <!-- ===================== TELA: CONSULTA INTERNA ===================== -->
     <section class="screen active" id="screen-consulta">
 
-      <div class="selo-consultor" id="selo-consultor" style="display:none;">
-        <div class="selo-consultor-avatar" id="selo-consultor-avatar"></div>
-        <span>Consultor logado: <strong id="selo-consultor-nome"></strong></span>
+      <div class="consulta-topbar">
+        <div class="selo-consultor" id="selo-consultor" style="display:none;">
+          <div class="selo-consultor-avatar" id="selo-consultor-avatar"></div>
+          <span>Consultor logado: <strong id="selo-consultor-nome"></strong></span>
+        </div>
       </div>
 
       <div id="consulta-lista-view">
         <div class="consulta-central">
           <div class="consulta-header">
-            <div class="consulta-icone" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <div class="consulta-logo" aria-hidden="true">
+              <svg viewBox="0 0 40 40" fill="none">
+                <defs>
+                  <linearGradient id="consultaLogoGrad" x1="4" y1="2" x2="37" y2="38" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stop-color="#FFC562"/>
+                    <stop offset="0.55" stop-color="#F0A82E"/>
+                    <stop offset="1" stop-color="#C6790C"/>
+                  </linearGradient>
+                  <radialGradient id="consultaLogoGloss" cx="0.32" cy="0.22" r="0.75">
+                    <stop offset="0" stop-color="#fff" stop-opacity="0.55"/>
+                    <stop offset="0.5" stop-color="#fff" stop-opacity="0.08"/>
+                    <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+                  </radialGradient>
+                </defs>
+                <rect width="40" height="40" rx="13" fill="url(#consultaLogoGrad)"/>
+                <rect width="40" height="40" rx="13" fill="url(#consultaLogoGloss)"/>
+                <rect x="1" y="1" width="38" height="38" rx="12" stroke="#fff" stroke-opacity="0.25"/>
+                <circle cx="20" cy="20" r="10" stroke="#fff" stroke-width="2.3" fill="none"/>
+                <circle cx="20" cy="20" r="2.6" fill="#fff"/>
+                <path d="M20 8.5 V13 M20 27 V31.5 M8.5 20 H13 M27 20 H31.5" stroke="#fff" stroke-width="2.3" stroke-linecap="round"/>
+              </svg>
             </div>
+            <div class="consulta-wordmark">DETRAN</div>
+            <div class="consulta-rule"></div>
             <h1>Consulta interna</h1>
             <p class="subhead" style="margin-bottom:0;">Digite o CPF do aluno para localizar o prontuário completo cadastrado no sistema do CFC.</p>
           </div>
@@ -945,28 +1167,63 @@ tr:last-child td{ border-bottom:none;}
           <div class="consulta-atalho">
             <button class="secondary" type="button" id="btn-ir-lista-cadastrados">📋 Ver todos os prontuários cadastrados</button>
           </div>
+
+          <div class="trust-strip no-print">
+            <div class="trust-badge" title="As senhas dos consultores são armazenadas com hash (nunca em texto puro) e verificadas no servidor, não no navegador.">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+              <span>Senhas criptografadas</span>
+            </div>
+            <div class="trust-badge" title="Toda consulta exige a senha de um consultor cadastrado e autorizado — ninguém pesquisa sem se identificar.">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/><path d="M14.5 15.5l1.3 1.3 2.7-2.8" stroke-width="2"/></svg>
+              <span>Acesso por consultor</span>
+            </div>
+            <div class="trust-badge" title="O banco de dados pode ser baixado a qualquer momento pela tela de administração — backup sob seu controle.">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+              <span>Backup sob demanda</span>
+            </div>
+          </div>
         </div>
 
         <div id="lista-alunos" class="lista-alunos"></div>
       </div>
 
       <div id="consulta-detalhe-view" style="display:none;">
-        <button class="back-link" id="btn-voltar-lista">← Voltar à lista</button>
+        <div class="detalhe-toolbar">
+          <button class="back-link" id="btn-voltar-lista">← Voltar à lista</button>
+          <button class="secondary no-print" type="button" id="btn-imprimir-prontuario">🖨 Imprimir</button>
+        </div>
         <div id="detalhe-conteudo"></div>
       </div>
 
     </section>
 
+    <!-- ===================== TELA: PAINEL DE GESTÃO ===================== -->
+    <section class="screen" id="screen-painel">
+      <h1>Painel de gestão</h1>
+      <p class="subhead">Visão geral de todos os prontuários cadastrados no CFC — atualizado em tempo real conforme os dados do sistema.</p>
+      <div id="painel-conteudo"></div>
+    </section>
+
     <!-- ===================== TELA: PRONTUÁRIOS CADASTRADOS ===================== -->
     <section class="screen" id="screen-lista">
-      <h1>Prontuários cadastrados</h1>
-      <p class="subhead">Todos os alunos matriculados no sistema. Clique num prontuário para abri-lo, ou use o ícone de lixeira pra excluir direto daqui.</p>
+      <div class="card-header-row">
+        <div>
+          <h1>Prontuários cadastrados</h1>
+          <p class="subhead" style="margin-bottom:0;">Todos os alunos matriculados no sistema. Clique num prontuário para abri-lo, ou use o ícone de lixeira pra excluir direto daqui.</p>
+        </div>
+        <a class="secondary" href="/api/backup" download style="text-decoration:none; white-space:nowrap;">⬇ Baixar backup do banco</a>
+      </div>
+
+      <div class="storage-status loading" id="storage-status" style="margin-top:20px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        <div><div class="t">Verificando armazenamento…</div></div>
+      </div>
 
       <div class="card">
         <h2>Consultores</h2>
-        <p class="card-note">Cadastre o nome e a senha de cada consultor autorizado a fazer consultas. A senha é pedida toda vez que alguém for pesquisar um prontuário na tela de Consulta interna.</p>
+        <p class="card-note">Cadastre o nome e a senha de cada consultor autorizado a fazer consultas. A senha é pedida toda vez que alguém for pesquisar um prontuário na tela de Consulta interna. As senhas ficam criptografadas no servidor — por segurança, não é possível visualizar a senha atual, só definir uma nova.</p>
         <table>
-          <tr><th>Nome</th><th>Senha</th><th></th></tr>
+          <tr><th>Nome</th><th>Redefinir senha</th><th></th></tr>
           <tbody id="consultores-lista"></tbody>
         </table>
         <div class="mini-form">
@@ -1164,6 +1421,7 @@ function validarProntuario(aluno){
    não mais apenas no navegador.
    ============================================================ */
 let state = { alunos: [], consultores: [] };
+let carregamentoInicialConcluido = false;
 let alunoSelecionadoId = null;
 
 async function carregarDados(){
@@ -1219,6 +1477,21 @@ async function salvarConsultores(){
 }
 
 /* ============================================================
+   TEMA CLARO/ESCURO
+   ============================================================ */
+function atualizarRotuloTema(){
+  const escuro = document.documentElement.dataset.theme === 'dark';
+  document.getElementById('theme-toggle-label').textContent = escuro ? 'Modo claro' : 'Modo escuro';
+}
+document.getElementById('theme-toggle').addEventListener('click', () => {
+  const novoTema = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = novoTema;
+  localStorage.setItem('tema', novoTema);
+  atualizarRotuloTema();
+});
+atualizarRotuloTema();
+
+/* ============================================================
    NAVEGAÇÃO ENTRE TELAS
    ============================================================ */
 document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -1239,6 +1512,9 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
       renderListaTodosAlunos();
       renderListaConsultores();
     }
+    if (btn.dataset.screen === 'painel'){
+      renderPainel();
+    }
   });
 });
 
@@ -1246,11 +1522,15 @@ document.getElementById('btn-ir-lista-cadastrados').addEventListener('click', ()
   document.querySelector('.nav-btn[data-screen="lista"]').click();
 });
 
-function mostrarToast(msg){
+function mostrarToast(msg, tipo){
   const t = document.getElementById('toast');
+  if (!tipo){
+    tipo = /não foi possível|inválid|informe|escolha uma|preencha|digite (a|um)|nenhum consultor/i.test(msg) ? 'error' : 'success';
+  }
   t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2400);
+  t.className = 'toast show ' + tipo;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2800);
 }
 
 /* ============================================================
@@ -1577,6 +1857,10 @@ document.getElementById('btn-voltar-lista').addEventListener('click', () => {
   renderListaAlunos();
 });
 
+document.getElementById('btn-imprimir-prontuario').addEventListener('click', () => {
+  window.print();
+});
+
 /* ============================================================
    SENHA DE CONSULTOR — exigida a cada consulta por CPF/nome
    ============================================================ */
@@ -1624,10 +1908,31 @@ function abrirModalSenhaConsultor(onSuccess){
   overlay.style.display = 'flex';
   input.focus();
 
-  const confirmar = () => {
+  const confirmar = async () => {
     const senha = input.value;
-    const consultor = state.consultores.find(c => c.senha === senha);
-    if (!consultor){
+    if (!senha){
+      erro.textContent = 'Informe a senha.';
+      erro.classList.add('show');
+      return;
+    }
+    btnConfirmar.disabled = true;
+    let resultado;
+    try{
+      const res = await fetch('/api/consultores/verificar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ senha }),
+      });
+      resultado = await res.json();
+    } catch(e){
+      console.error(e);
+      btnConfirmar.disabled = false;
+      erro.textContent = 'Não foi possível verificar a senha no servidor.';
+      erro.classList.add('show');
+      return;
+    }
+    btnConfirmar.disabled = false;
+    if (!resultado.ok){
       erro.textContent = 'Senha de consultor inválida.';
       erro.classList.add('show');
       input.focus();
@@ -1635,9 +1940,9 @@ function abrirModalSenhaConsultor(onSuccess){
       return;
     }
     overlay.style.display = 'none';
-    consultorAtual = consultor;
+    consultorAtual = resultado.consultor;
     atualizarSeloConsultor();
-    mostrarToast(`Consulta liberada — consultor: ${consultor.nome}.`);
+    mostrarToast(`Consulta liberada — consultor: ${consultorAtual.nome}.`);
     onSuccess();
   };
   const cancelar = () => { overlay.style.display = 'none'; };
@@ -1679,7 +1984,7 @@ async function executarBuscaComCarregamento(){
 
 function renderListaAlunos(){
   const termoBruto = (document.getElementById('busca-aluno').value || '').trim();
-  const termo = termoBruto.toLowerCase();
+  const termo = normalizarBusca(termoBruto);
   const termoCpf = termoBruto.replace(/\D/g, ''); // só dígitos, pra comparar CPF de verdade
   const buscaAtiva = termoBruto !== '';
   const container = document.getElementById('lista-alunos');
@@ -1698,7 +2003,7 @@ function renderListaAlunos(){
 
   // busca real nos prontuários já criados no sistema (state.alunos, persistido no servidor via API)
   const filtrados = state.alunos.filter(a =>
-    a.nome.toLowerCase().includes(termo) ||
+    normalizarBusca(a.nome).includes(termo) ||
     (termoCpf.length > 0 && a.cpf.includes(termoCpf))
   );
 
@@ -1758,9 +2063,14 @@ function renderListaAlunos(){
    ============================================================ */
 function renderListaTodosAlunos(){
   const termoBruto = (document.getElementById('filtro-lista-cadastrados').value || '').trim();
-  const termo = termoBruto.toLowerCase();
+  const termo = normalizarBusca(termoBruto);
   const termoCpf = termoBruto.replace(/\D/g, '');
   const container = document.getElementById('lista-todos-alunos');
+
+  if (!carregamentoInicialConcluido){
+    container.innerHTML = `<div class="empty carregando-lista">Carregando prontuários…</div>`;
+    return;
+  }
 
   if (state.alunos.length === 0){
     container.innerHTML = `<div class="empty">Nenhum prontuário cadastrado ainda.</div>`;
@@ -1770,7 +2080,7 @@ function renderListaTodosAlunos(){
   const lista = termoBruto === ''
     ? state.alunos
     : state.alunos.filter(a =>
-        a.nome.toLowerCase().includes(termo) ||
+        normalizarBusca(a.nome).includes(termo) ||
         (termoCpf.length > 0 && a.cpf.includes(termoCpf))
       );
 
@@ -1826,6 +2136,10 @@ document.getElementById('filtro-lista-cadastrados').addEventListener('input', re
    ============================================================ */
 function renderListaConsultores(){
   const tbody = document.getElementById('consultores-lista');
+  if (!carregamentoInicialConcluido){
+    tbody.innerHTML = '<tr><td colspan="3" class="carregando-linha">Carregando consultores…</td></tr>';
+    return;
+  }
   if (!state.consultores || state.consultores.length === 0){
     tbody.innerHTML = '<tr><td colspan="3" style="color:var(--ink-soft);">Nenhum consultor cadastrado ainda.</td></tr>';
     return;
@@ -1833,7 +2147,7 @@ function renderListaConsultores(){
   tbody.innerHTML = state.consultores.map(c => `
     <tr>
       <td><input type="text" value="${escapeHtml(c.nome)}" onchange="atualizarConsultor('${c.id}', 'nome', this.value)"></td>
-      <td><input type="password" value="${escapeHtml(c.senha)}" onchange="atualizarConsultor('${c.id}', 'senha', this.value)"></td>
+      <td><input type="password" value="" placeholder="Nova senha (deixe em branco p/ manter)" onchange="atualizarConsultor('${c.id}', 'senha', this.value)"></td>
       <td><button class="tiny remover" onclick="removerConsultor('${c.id}')" title="Remover consultor">✕</button></td>
     </tr>`).join('');
 }
@@ -1849,6 +2163,7 @@ async function adicionarConsultor(){
   }
   state.consultores.push({ id: 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6), nome, senha });
   await salvarConsultores();
+  await carregarConsultores();
   mostrarToast('Consultor cadastrado.');
   nomeInput.value = '';
   senhaInput.value = '';
@@ -1860,6 +2175,8 @@ async function atualizarConsultor(id, campo, valor){
   if (!c) return;
   c[campo] = campo === 'nome' ? valor.trim() : valor;
   await salvarConsultores();
+  await carregarConsultores();
+  renderListaConsultores();
 }
 
 async function removerConsultor(id){
@@ -1885,6 +2202,11 @@ function formatarCpf(cpf){
 }
 function escapeHtml(s){
   return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// minúsculas + sem acento, pra achar "jose" quando o cadastro tem "José"
+function normalizarBusca(s){
+  return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 }
 
 /* ============================================================
@@ -1940,7 +2262,9 @@ function renderDetalheAluno(){
 
     ${taxasPendentes.length > 0 ? `
     <div class="alerta-regularizacao">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+      <div class="alerta-regularizacao-icone">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+      </div>
       <div>
         <strong>Taxa de Regularização pendente</strong>
         <span>${taxasPendentes.length === 1 ? 'Há 1 taxa em aberto' : `Há ${taxasPendentes.length} taxas em aberto`} — total de R$ ${totalPendente.toFixed(2).replace('.', ',')}. Oriente o aluno a regularizar o pagamento para manter o prontuário em dia.</span>
@@ -2216,6 +2540,9 @@ function renderDetalheAluno(){
       <div class="taxas-lista">
         ${(aluno.taxas || []).map(tx => `
           <div class="taxa-item ${tx.status === 'paga' ? 'paga' : 'pendente'}">
+            <div class="taxa-icone ${tx.status === 'paga' ? 'ok' : 'pend'}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v1M12 16v1M9.5 15c0 1.1 1.1 2 2.5 2s2.5-.8 2.5-1.8-1-1.5-2.5-1.8-2.5-.8-2.5-1.8S10.6 10 12 10s2.5.6 2.5 1.5"/></svg>
+            </div>
             <div class="taxa-info">
               <span class="taxa-descricao">${escapeHtml(tx.descricao)}</span>
               ${tx.status === 'paga' ? '<span class="tag ok">Paga</span>' : '<span class="tag pend">Pendente</span>'}
@@ -2223,7 +2550,7 @@ function renderDetalheAluno(){
             <span class="taxa-valor">R$ ${Number(tx.valor).toFixed(2).replace('.', ',')}</span>
             <div class="taxa-acoes">
               ${tx.status !== 'paga'
-                ? `<button class="tiny tag-ok-btn" onclick="marcarTaxaPaga('${tx.id}')">Marcar como paga</button>`
+                ? `<button class="tiny tag-ok-btn" onclick="marcarTaxaPaga('${tx.id}')">✓ Marcar como paga</button>`
                 : ''}
               <button class="tiny remover" onclick="removerTaxa('${tx.id}')" title="Remover taxa">✕</button>
             </div>
@@ -2527,10 +2854,111 @@ async function definirStatusProntuario(status){
 /* ============================================================
    INICIALIZAÇÃO
    ============================================================ */
+async function carregarStatusArmazenamento(){
+  const box = document.getElementById('storage-status');
+  try{
+    const res = await fetch('/api/status');
+    if (!res.ok) throw new Error('Falha ao consultar status do armazenamento.');
+    const s = await res.json();
+    const persistente = s.db_path_configurado;
+    box.className = 'storage-status ' + (persistente ? 'ok' : 'warn');
+    box.innerHTML = persistente
+      ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+         <div><div class="t">Armazenamento persistente configurado</div>
+         <div class="d">Banco de dados em <code>${escapeHtml(s.db_path)}</code>. Confirme no painel do Railway que esse caminho é um Volume montado, senão os dados continuam se perdendo a cada deploy.</div></div>`
+      : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+         <div><div class="t">Armazenamento não configurado como persistente</div>
+         <div class="d">Banco em <code>${escapeHtml(s.db_path)}</code> — caminho padrão local. Em produção (Railway), isso é apagado a cada novo deploy. Configure a variável de ambiente <code>DB_PATH</code> apontando pra um Volume montado (ex.: <code>/data/dados.db</code>).</div></div>`;
+    box.style.display = 'flex';
+  } catch(e){
+    console.error(e);
+  }
+}
+
+const TIPOS_PROCESSO = ['primeira_habilitacao', 'adicao_categoria', 'mudanca_categoria', 'renovacao', 'reciclagem'];
+
+function renderPainel(){
+  const container = document.getElementById('painel-conteudo');
+  if (!carregamentoInicialConcluido){
+    container.innerHTML = '<div class="empty carregando-lista">Carregando painel…</div>';
+    return;
+  }
+
+  const alunos = state.alunos;
+  const total = alunos.length;
+
+  if (total === 0){
+    container.innerHTML = '<div class="empty">Nenhum prontuário cadastrado ainda — matricule um aluno pra ver os números aqui.</div>';
+    return;
+  }
+
+  const completos = alunos.filter(a => validarProntuario(a).completo).length;
+  const pctCompletos = Math.round((completos / total) * 100);
+
+  const porStatus = { regular: 0, pendente: 0, irregular: 0 };
+  alunos.forEach(a => {
+    const s = a.statusProntuario || 'pendente';
+    porStatus[s] = (porStatus[s] || 0) + 1;
+  });
+
+  let taxasAbertasValor = 0, taxasAbertasQtd = 0;
+  alunos.forEach(a => (a.taxas || []).forEach(t => {
+    if (t.status !== 'paga'){ taxasAbertasValor += Number(t.valor); taxasAbertasQtd++; }
+  }));
+
+  const porProcesso = {};
+  alunos.forEach(a => { porProcesso[a.tipoProcesso] = (porProcesso[a.tipoProcesso] || 0) + 1; });
+  const processoMax = Math.max(1, ...TIPOS_PROCESSO.map(k => porProcesso[k] || 0));
+
+  const rotuloStatus = { regular: 'Regular', pendente: 'Pendente', irregular: 'Irregular' };
+
+  container.innerHTML = `
+    <div class="painel-stats">
+      <div class="painel-stat"><div class="n">${total}</div><div class="l">Alunos cadastrados</div></div>
+      <div class="painel-stat ok"><div class="n">${pctCompletos}%</div><div class="l">Prontuários completos</div></div>
+      <div class="painel-stat pend"><div class="n">${porStatus.pendente}</div><div class="l">Com pendência</div></div>
+      <div class="painel-stat pend"><div class="n">R$ ${taxasAbertasValor.toFixed(2).replace('.', ',')}</div><div class="l">${taxasAbertasQtd} taxa(s) em aberto</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Situação dos prontuários</h2>
+      <p class="card-note">Classificação manual definida em cada prontuário.</p>
+      <div class="painel-barra-lista">
+        ${['regular', 'pendente', 'irregular'].map(s => {
+          const qtd = porStatus[s] || 0;
+          const pct = total ? Math.round((qtd / total) * 100) : 0;
+          return `<div class="painel-barra-item">
+            <div class="painel-barra-topo"><span>${rotuloStatus[s]}</span><span>${qtd} · ${pct}%</span></div>
+            <div class="painel-barra-trilho"><div class="painel-barra-fill ${s}" style="width:${pct}%"></div></div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Alunos por tipo de processo</h2>
+      <div class="painel-barra-lista">
+        ${TIPOS_PROCESSO.map(k => {
+          const qtd = porProcesso[k] || 0;
+          const pct = Math.round((qtd / processoMax) * 100);
+          return `<div class="painel-barra-item">
+            <div class="painel-barra-topo"><span>${LABELS[k]}</span><span>${qtd}</span></div>
+            <div class="painel-barra-trilho"><div class="painel-barra-fill neutro" style="width:${pct}%"></div></div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
 (async function init(){
   await Promise.all([carregarDados(), carregarConsultores()]);
+  carregamentoInicialConcluido = true;
   renderListaAlunos();
   renderListaConsultores();
+  renderListaTodosAlunos();
+  renderPainel();
+  carregarStatusArmazenamento();
 })();
 </script>
 </body>
