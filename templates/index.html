@@ -95,6 +95,7 @@
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
+html{ overflow-x:hidden; }
 body{
   background: var(--paper);
   color: var(--ink);
@@ -103,6 +104,7 @@ body{
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  overflow-x:hidden;
 }
 
 /* ---------- Barra de governo ---------- */
@@ -511,6 +513,8 @@ button.tiny:hover{ background: var(--ochre-tint); color:var(--ochre-dark); borde
 
 /* foto do aluno */
 .foto-upload-row{ display:flex; align-items:center; gap:18px; }
+.foto-upload-row > div{ min-width:0; flex:1; }
+.foto-upload-row input[type=file]{ max-width:100%; }
 .foto-preview{
   width:120px; height:120px; border-radius: var(--radius-sm);
   border: 1.5px dashed var(--line);
@@ -583,7 +587,7 @@ button.tiny:hover{ background: var(--ochre-tint); color:var(--ochre-dark); borde
 .resultado-consulta span{ font-family:'JetBrains Mono', monospace; font-size:12px; opacity:.85; }
 
 .detalhe-header{ display:flex; align-items:center; gap:18px; margin-bottom: 18px; }
-.detalhe-header .titulos{ flex:1; }
+.detalhe-header .titulos{ flex:1; min-width:0; }
 .detalhe-header h1{ margin-bottom:6px; }
 .situacao-badge{
   display:inline-block;
@@ -863,6 +867,7 @@ button.tiny.remover:hover{ background: var(--pend); color: #fff; }
 }
 .selo.ok{ color: var(--ok); }
 .selo.pend{ color: var(--pend); }
+.selo-text{ min-width:0; flex:1; }
 .selo-text strong{ display:block; font-size:15px; font-family:'Sora', sans-serif; margin-bottom:2px; color:var(--ink);}
 .selo-text span{ font-size:12.5px; color:var(--ink-soft);}
 
@@ -940,13 +945,79 @@ tr:last-child td{ border-bottom:none;}
 .link-perigo:hover{ color:var(--pend); opacity:1; text-decoration:underline; }
 
 @media (max-width: 760px){
-  .app{flex-direction:column;}
-  .sidebar{width:100%; flex-direction:row; align-items:center; padding:16px 20px;}
-  .brand{border:none; padding:0; margin:0; margin-right:20px;}
-  .sidebar-footer{display:none;}
-  nav{flex-direction:row;}
-  main{padding:22px;}
-  .grid{grid-template-columns:1fr;}
+  .govbar{ padding:7px 14px; font-size:10px; }
+
+  .app{ flex-direction:column; min-height:0; }
+
+  /* sidebar vira uma barra superior compacta: marca, depois nav com scroll horizontal */
+  .sidebar{
+    width:100%; flex-direction:column; align-items:stretch;
+    padding:14px 16px 10px; gap:0;
+  }
+  .brand{ border:none; padding:0; margin:0 0 12px 0; }
+  .logo-mark{ width:36px; height:36px; }
+  .brand-word{ font-size:16px; }
+  .brand .eyebrow{ font-size:9.5px; }
+
+  nav{
+    flex-direction:row; overflow-x:auto; gap:8px;
+    padding-bottom:6px; margin:0 -16px; padding-left:16px; padding-right:16px;
+    -webkit-overflow-scrolling:touch; scrollbar-width:none;
+  }
+  nav::-webkit-scrollbar{ display:none; }
+  .nav-btn{ white-space:nowrap; flex-shrink:0; padding:10px 14px; font-size:13px; }
+  .nav-btn:hover{ transform:none; }
+
+  .sidebar-footer{ display:none; }
+  .sidebar-usuario{ margin-top:12px; padding-top:12px; }
+  .admin-link{ margin-top:10px; }
+  .theme-toggle{ margin-top:10px; }
+
+  main{ padding:20px 16px 48px; max-width:100%; }
+  h1{ font-size:22px; }
+  .subhead{ font-size:13px; margin-bottom:20px; }
+  .card{ padding:18px 16px; }
+  .card-header-row{ flex-wrap:wrap; }
+
+  .grid{ grid-template-columns:1fr; }
+  .foto-upload-row{ flex-wrap:wrap; }
+
+  /* tabelas ficam com rolagem horizontal em vez de espremer colunas */
+  table{ display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
+  .detalhe-header{ flex-direction:column; text-align:center; gap:12px; }
+  .detalhe-toolbar{ flex-wrap:wrap; gap:10px; }
+
+  .taxa-item{ flex-wrap:wrap; }
+  .taxa-valor{ margin-left:auto; }
+  .taxa-acoes{ width:100%; justify-content:flex-end; margin-top:2px; }
+
+  .selo{ padding:16px 18px; }
+  .consulta-topbar{ justify-content:center; }
+  .selo-consultor{ flex-wrap:wrap; justify-content:center; text-align:center; padding:10px 16px; }
+
+  .mini-field input, .mini-field select{ min-width:0; }
+}
+
+@media (max-width: 480px){
+  .govbar-desc{ display:none; }
+
+  #login-screen{ padding:16px; }
+  .login-card{ padding:28px 20px 24px; }
+
+  .search-bar-pro{ flex-wrap:wrap; padding:10px 14px; }
+  .search-bar-pro input{ flex:1 1 100%; order:2; padding:8px 0; }
+  .search-bar-pro button.primary{ order:3; width:100%; text-align:center; margin-top:2px; }
+
+  .painel-stats{ grid-template-columns: repeat(2, 1fr); gap:10px; }
+  .dados-grid{ grid-template-columns: 1fr; }
+
+  .modal-box{ padding:18px; max-width:320px; }
+  .foto-editor-viewport{ width:220px; height:220px; }
+
+  .toast{ left:14px; right:14px; bottom:14px; text-align:center; }
+
+  .empty, .carregando-busca{ padding:32px 16px; }
 }
 
 @media print{
@@ -1029,7 +1100,7 @@ tr:last-child td{ border-bottom:none;}
 
 <div class="govbar">
   <span class="govbar-flag"></span>
-  DETRAN <span class="govbar-sep">·</span> Painel de gestão de prontuários do CFC
+  DETRAN <span class="govbar-sep">·</span> <span class="govbar-desc">Painel de gestão de prontuários do CFC</span>
 </div>
 <div class="app">
 
