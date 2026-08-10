@@ -537,7 +537,7 @@ button.tiny:hover{ background: var(--ochre-tint); color:var(--ochre-dark); borde
 .avatar-mini img{ width:100%; height:100%; object-fit:cover; }
 
 .avatar-grande{
-  width:210px; height:210px; border-radius: var(--radius);
+  width:240px; height:240px; border-radius: var(--radius);
   background: var(--paper-2); color:var(--ink-soft);
   display:flex; align-items:center; justify-content:center;
   overflow:hidden; flex-shrink:0; border: 3px solid #fff; box-shadow: 0 0 0 1.5px var(--line), var(--shadow-md);
@@ -1718,19 +1718,22 @@ function abrirEditorFoto(srcBase64, onSave){
       FOTO_EDITOR_LARGURA / img.naturalWidth,
       FOTO_EDITOR_ALTURA / img.naturalHeight
     );
-    // zoom mínimo mostra a foto inteira (sem cortar nada); 100% é o corte justo no quadro.
-    const zoomMinimo = Math.round((escalaContida / escalaCobertura) * 100);
+    // zoom em que a foto inteira aparece, sem cortar nada; 100% é o corte justo no quadro.
+    const zoomFotoInteira = (escalaContida / escalaCobertura) * 100;
+    // padrão fica um pouco mais afastado que isso, deixando uma margem ao redor do rosto.
+    const zoomPadrao = Math.max(15, Math.round(zoomFotoInteira * 0.8));
+    const zoomMinimo = Math.max(10, Math.round(zoomFotoInteira * 0.55));
     fotoEditorState = {
       imgNatW: img.naturalWidth,
       imgNatH: img.naturalHeight,
       scaleBase: escalaCobertura,
-      scale: escalaContida / escalaCobertura,
+      scale: zoomPadrao / 100,
       offsetX: 0,
       offsetY: 0,
       onSave,
     };
     zoom.min = zoomMinimo;
-    zoom.value = zoomMinimo;
+    zoom.value = zoomPadrao;
     aplicarTransformFotoEditor();
   };
   img.src = srcBase64;
