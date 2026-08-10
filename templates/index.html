@@ -516,7 +516,7 @@ button.tiny:hover{ background: var(--ochre-tint); color:var(--ochre-dark); borde
 .foto-upload-row > div{ min-width:0; flex:1; }
 .foto-upload-row input[type=file]{ max-width:100%; }
 .foto-preview{
-  width:135px; height:180px; border-radius: var(--radius-sm);
+  width:150px; height:150px; border-radius: var(--radius-sm);
   border: 1.5px dashed var(--line);
   background: var(--paper-2);
   display:flex; align-items:center; justify-content:center;
@@ -537,7 +537,7 @@ button.tiny:hover{ background: var(--ochre-tint); color:var(--ochre-dark); borde
 .avatar-mini img{ width:100%; height:100%; object-fit:cover; }
 
 .avatar-grande{
-  width:180px; height:240px; border-radius: var(--radius);
+  width:210px; height:210px; border-radius: var(--radius);
   background: var(--paper-2); color:var(--ink-soft);
   display:flex; align-items:center; justify-content:center;
   overflow:hidden; flex-shrink:0; border: 3px solid #fff; box-shadow: 0 0 0 1.5px var(--line), var(--shadow-md);
@@ -613,7 +613,7 @@ button.tiny:hover{ background: var(--ochre-tint); color:var(--ochre-dark); borde
 .modal-box h3{ font-family:'Sora', sans-serif; font-size:17px; font-weight:700; margin:0 0 4px 0; }
 .modal-box .card-note{ margin-bottom:16px; }
 .foto-editor-viewport{
-  width: 240px; height: 320px; margin: 0 auto 16px auto;
+  width: 280px; height: 280px; margin: 0 auto 16px auto;
   border-radius: var(--radius-sm);
   overflow:hidden; position:relative;
   background: var(--paper-2);
@@ -626,6 +626,12 @@ button.tiny:hover{ background: var(--ochre-tint); color:var(--ochre-dark); borde
   max-width:none;
   transform-origin: center center;
   user-select:none; pointer-events:none;
+}
+.foto-editor-guia{
+  position:absolute; inset:0; pointer-events:none;
+  background: rgba(10,20,35,.45);
+  -webkit-mask: radial-gradient(ellipse 36% 42% at 50% 44%, transparent 97%, #000 100%);
+          mask: radial-gradient(ellipse 36% 42% at 50% 44%, transparent 97%, #000 100%);
 }
 .foto-editor-zoom-row{ display:flex; align-items:center; gap:10px; margin-bottom:18px; }
 .foto-editor-zoom-row input[type=range]{ flex:1; }
@@ -1013,7 +1019,7 @@ tr:last-child td{ border-bottom:none;}
   .dados-grid{ grid-template-columns: 1fr; }
 
   .modal-box{ padding:18px; max-width:320px; }
-  .foto-editor-viewport{ width:195px; height:260px; }
+  .foto-editor-viewport{ width:230px; height:230px; }
 
   .toast{ left:14px; right:14px; bottom:14px; text-align:center; }
 
@@ -1402,9 +1408,10 @@ tr:last-child td{ border-bottom:none;}
 <div class="modal-overlay" id="foto-editor-overlay" style="display:none;">
   <div class="modal-box">
     <h3>Ajustar foto</h3>
-    <p class="card-note">Arraste pra reposicionar e use o zoom pra enquadrar o rosto.</p>
+    <p class="card-note">Arraste e use o zoom até o rosto do cliente preencher a área guiada abaixo.</p>
     <div class="foto-editor-viewport" id="foto-editor-viewport">
       <img id="foto-editor-img" alt="">
+      <div class="foto-editor-guia" aria-hidden="true"></div>
     </div>
     <div class="foto-editor-zoom-row">
       <span style="font-size:16px;">－</span>
@@ -1687,12 +1694,12 @@ let fotoSelecionadaBase64 = null;
 
 /* ============================================================
    EDITOR DE FOTO — arrastar para reposicionar + zoom.
-   Recorta sempre no padrão 3x4 (retrato) e devolve um novo base64.
+   Recorta sempre em quadrado, centralizado no rosto, e devolve um novo base64.
    ============================================================ */
-const FOTO_EDITOR_LARGURA = 240; // largura do viewport visível (px)
-const FOTO_EDITOR_ALTURA = 320;  // altura do viewport visível (px)
-const FOTO_SAIDA_LARGURA = 360;  // resolução final salva (px) — largura
-const FOTO_SAIDA_ALTURA = 480;   // resolução final salva (px) — altura
+const FOTO_EDITOR_LARGURA = 280; // largura do viewport visível (px)
+const FOTO_EDITOR_ALTURA = 280;  // altura do viewport visível (px)
+const FOTO_SAIDA_LARGURA = 440;  // resolução final salva (px) — largura
+const FOTO_SAIDA_ALTURA = 440;   // resolução final salva (px) — altura
 let fotoEditorState = null; // { imgNatW, imgNatH, scaleBase, scale, offsetX, offsetY, onSave }
 let fotoEditorArrastando = false;
 let fotoEditorInicio = { x: 0, y: 0, offsetX: 0, offsetY: 0 };
