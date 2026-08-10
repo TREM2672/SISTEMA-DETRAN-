@@ -516,7 +516,7 @@ button.tiny:hover{ background: var(--ochre-tint); color:var(--ochre-dark); borde
 .foto-upload-row > div{ min-width:0; flex:1; }
 .foto-upload-row input[type=file]{ max-width:100%; }
 .foto-preview{
-  width:120px; height:120px; border-radius: var(--radius-sm);
+  width:135px; height:180px; border-radius: var(--radius-sm);
   border: 1.5px dashed var(--line);
   background: var(--paper-2);
   display:flex; align-items:center; justify-content:center;
@@ -537,7 +537,7 @@ button.tiny:hover{ background: var(--ochre-tint); color:var(--ochre-dark); borde
 .avatar-mini img{ width:100%; height:100%; object-fit:cover; }
 
 .avatar-grande{
-  width:150px; height:150px; border-radius: var(--radius);
+  width:180px; height:240px; border-radius: var(--radius);
   background: var(--paper-2); color:var(--ink-soft);
   display:flex; align-items:center; justify-content:center;
   overflow:hidden; flex-shrink:0; border: 3px solid #fff; box-shadow: 0 0 0 1.5px var(--line), var(--shadow-md);
@@ -613,7 +613,7 @@ button.tiny:hover{ background: var(--ochre-tint); color:var(--ochre-dark); borde
 .modal-box h3{ font-family:'Sora', sans-serif; font-size:17px; font-weight:700; margin:0 0 4px 0; }
 .modal-box .card-note{ margin-bottom:16px; }
 .foto-editor-viewport{
-  width: 260px; height: 260px; margin: 0 auto 16px auto;
+  width: 240px; height: 320px; margin: 0 auto 16px auto;
   border-radius: var(--radius-sm);
   overflow:hidden; position:relative;
   background: var(--paper-2);
@@ -1013,7 +1013,7 @@ tr:last-child td{ border-bottom:none;}
   .dados-grid{ grid-template-columns: 1fr; }
 
   .modal-box{ padding:18px; max-width:320px; }
-  .foto-editor-viewport{ width:220px; height:220px; }
+  .foto-editor-viewport{ width:195px; height:260px; }
 
   .toast{ left:14px; right:14px; bottom:14px; text-align:center; }
 
@@ -1687,10 +1687,12 @@ let fotoSelecionadaBase64 = null;
 
 /* ============================================================
    EDITOR DE FOTO — arrastar para reposicionar + zoom.
-   Recorta sempre em quadrado (400x400) e devolve um novo base64.
+   Recorta sempre no padrão 3x4 (retrato) e devolve um novo base64.
    ============================================================ */
-const FOTO_EDITOR_TAMANHO = 260; // tamanho do viewport visível (px)
-const FOTO_SAIDA_TAMANHO = 420;  // resolução da imagem final salva (px)
+const FOTO_EDITOR_LARGURA = 240; // largura do viewport visível (px)
+const FOTO_EDITOR_ALTURA = 320;  // altura do viewport visível (px)
+const FOTO_SAIDA_LARGURA = 360;  // resolução final salva (px) — largura
+const FOTO_SAIDA_ALTURA = 480;   // resolução final salva (px) — altura
 let fotoEditorState = null; // { imgNatW, imgNatH, scaleBase, scale, offsetX, offsetY, onSave }
 let fotoEditorArrastando = false;
 let fotoEditorInicio = { x: 0, y: 0, offsetX: 0, offsetY: 0 };
@@ -1702,8 +1704,8 @@ function abrirEditorFoto(srcBase64, onSave){
 
   img.onload = () => {
     const escalaCobertura = Math.max(
-      FOTO_EDITOR_TAMANHO / img.naturalWidth,
-      FOTO_EDITOR_TAMANHO / img.naturalHeight
+      FOTO_EDITOR_LARGURA / img.naturalWidth,
+      FOTO_EDITOR_ALTURA / img.naturalHeight
     );
     fotoEditorState = {
       imgNatW: img.naturalWidth,
@@ -1741,8 +1743,8 @@ function limitarArrastoFotoEditor(){
   const escalaFinal = fotoEditorState.scaleBase * fotoEditorState.scale;
   const largura = fotoEditorState.imgNatW * escalaFinal;
   const altura = fotoEditorState.imgNatH * escalaFinal;
-  const limiteX = Math.max(0, (largura - FOTO_EDITOR_TAMANHO) / 2);
-  const limiteY = Math.max(0, (altura - FOTO_EDITOR_TAMANHO) / 2);
+  const limiteX = Math.max(0, (largura - FOTO_EDITOR_LARGURA) / 2);
+  const limiteY = Math.max(0, (altura - FOTO_EDITOR_ALTURA) / 2);
   fotoEditorState.offsetX = Math.min(limiteX, Math.max(-limiteX, fotoEditorState.offsetX));
   fotoEditorState.offsetY = Math.min(limiteY, Math.max(-limiteY, fotoEditorState.offsetY));
 }
@@ -1776,19 +1778,19 @@ function salvarFotoEditada(){
   const img = document.getElementById('foto-editor-img');
   const escalaFinal = fotoEditorState.scaleBase * fotoEditorState.scale;
 
-  // Área (em pixels da imagem original) que está visível dentro do viewport quadrado
-  const larguraVisivelOriginal = FOTO_EDITOR_TAMANHO / escalaFinal;
-  const alturaVisivelOriginal = FOTO_EDITOR_TAMANHO / escalaFinal;
+  // Área (em pixels da imagem original) que está visível dentro do viewport 3x4
+  const larguraVisivelOriginal = FOTO_EDITOR_LARGURA / escalaFinal;
+  const alturaVisivelOriginal = FOTO_EDITOR_ALTURA / escalaFinal;
   const centroXOriginal = fotoEditorState.imgNatW / 2 - fotoEditorState.offsetX / escalaFinal;
   const centroYOriginal = fotoEditorState.imgNatH / 2 - fotoEditorState.offsetY / escalaFinal;
   const sx = centroXOriginal - larguraVisivelOriginal / 2;
   const sy = centroYOriginal - alturaVisivelOriginal / 2;
 
   const canvas = document.createElement('canvas');
-  canvas.width = FOTO_SAIDA_TAMANHO;
-  canvas.height = FOTO_SAIDA_TAMANHO;
+  canvas.width = FOTO_SAIDA_LARGURA;
+  canvas.height = FOTO_SAIDA_ALTURA;
   const ctx = canvas.getContext('2d');
-  ctx.drawImage(img, sx, sy, larguraVisivelOriginal, alturaVisivelOriginal, 0, 0, FOTO_SAIDA_TAMANHO, FOTO_SAIDA_TAMANHO);
+  ctx.drawImage(img, sx, sy, larguraVisivelOriginal, alturaVisivelOriginal, 0, 0, FOTO_SAIDA_LARGURA, FOTO_SAIDA_ALTURA);
 
   const resultado = canvas.toDataURL('image/jpeg', 0.92);
   const callback = fotoEditorState.onSave;
