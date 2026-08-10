@@ -1415,7 +1415,7 @@ tr:last-child td{ border-bottom:none;}
     </div>
     <div class="foto-editor-zoom-row">
       <span style="font-size:16px;">－</span>
-      <input type="range" id="foto-editor-zoom" min="100" max="300" value="100">
+      <input type="range" id="foto-editor-zoom" min="30" max="300" value="100">
       <span style="font-size:16px;">＋</span>
     </div>
     <div class="modal-actions">
@@ -1714,16 +1714,23 @@ function abrirEditorFoto(srcBase64, onSave){
       FOTO_EDITOR_LARGURA / img.naturalWidth,
       FOTO_EDITOR_ALTURA / img.naturalHeight
     );
+    const escalaContida = Math.min(
+      FOTO_EDITOR_LARGURA / img.naturalWidth,
+      FOTO_EDITOR_ALTURA / img.naturalHeight
+    );
+    // zoom mínimo mostra a foto inteira (sem cortar nada); 100% é o corte justo no quadro.
+    const zoomMinimo = Math.round((escalaContida / escalaCobertura) * 100);
     fotoEditorState = {
       imgNatW: img.naturalWidth,
       imgNatH: img.naturalHeight,
       scaleBase: escalaCobertura,
-      scale: 1,
+      scale: escalaContida / escalaCobertura,
       offsetX: 0,
       offsetY: 0,
       onSave,
     };
-    zoom.value = 100;
+    zoom.min = zoomMinimo;
+    zoom.value = zoomMinimo;
     aplicarTransformFotoEditor();
   };
   img.src = srcBase64;
@@ -1797,6 +1804,9 @@ function salvarFotoEditada(){
   canvas.width = FOTO_SAIDA_LARGURA;
   canvas.height = FOTO_SAIDA_ALTURA;
   const ctx = canvas.getContext('2d');
+  // preenche o fundo (caso o zoom esteja reduzido e a foto não cubra o quadro inteiro)
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, FOTO_SAIDA_LARGURA, FOTO_SAIDA_ALTURA);
   ctx.drawImage(img, sx, sy, larguraVisivelOriginal, alturaVisivelOriginal, 0, 0, FOTO_SAIDA_LARGURA, FOTO_SAIDA_ALTURA);
 
   const resultado = canvas.toDataURL('image/jpeg', 0.92);
