@@ -1719,22 +1719,21 @@ function abrirEditorFoto(srcBase64, onSave){
       FOTO_EDITOR_LARGURA / img.naturalWidth,
       FOTO_EDITOR_ALTURA / img.naturalHeight
     );
-    // zoom em que a foto inteira aparece, sem cortar nada; 100% é o corte justo no quadro.
+    // zoom em que a foto inteira aparece, sem cortar nada (usado só como limite pra zoom manual).
     const zoomFotoInteira = (escalaContida / escalaCobertura) * 100;
-    // padrão fica um pouco mais afastado que isso, deixando uma margem ao redor do rosto.
-    const zoomPadrao = Math.max(15, Math.round(zoomFotoInteira * 0.8));
     const zoomMinimo = Math.max(10, Math.round(zoomFotoInteira * 0.55));
+    // padrão preenche o quadro por completo, sem sobra branca; usuário pode zoom out se quiser.
     fotoEditorState = {
       imgNatW: img.naturalWidth,
       imgNatH: img.naturalHeight,
       scaleBase: escalaCobertura,
-      scale: zoomPadrao / 100,
+      scale: 1,
       offsetX: 0,
       offsetY: 0,
       onSave,
     };
     zoom.min = zoomMinimo;
-    zoom.value = zoomPadrao;
+    zoom.value = 100;
     aplicarTransformFotoEditor();
   };
   img.src = srcBase64;
