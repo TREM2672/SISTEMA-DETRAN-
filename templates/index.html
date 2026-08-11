@@ -454,6 +454,38 @@ button.tiny:hover{ background: var(--ochre-tint); color:var(--ochre-dark); borde
 .painel-barra-fill.irregular{ background: var(--pend); }
 .painel-barra-fill.neutro{ background: linear-gradient(90deg, var(--navy-2), var(--navy)); }
 
+.cp-tiras{ display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin-bottom:20px; }
+@media (max-width:760px){ .cp-tiras{ grid-template-columns:repeat(2, 1fr); } }
+.cp-tira{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px; }
+.cp-tira .n{ font-family:'Sora', sans-serif; font-size:24px; font-weight:800; font-variant-numeric: tabular-nums; }
+.cp-tira .l{ font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin-top:2px; }
+.cp-tira.pend .n{ color:var(--pend); }
+.cp-tira.warn .n{ color:var(--ochre-dark); }
+.cp-tira.ok .n{ color:var(--ok); }
+.cp-grupo{ margin-bottom:18px; }
+.cp-grupo:last-child{ margin-bottom:0; }
+.cp-grupo-titulo{ display:flex; align-items:center; gap:9px; font-family:'Sora', sans-serif; font-size:14.5px; font-weight:700; margin-bottom:.7rem; }
+.cp-grupo-titulo svg{ width:18px; height:18px; flex-shrink:0; color:var(--navy-2); }
+.cp-grupo-titulo .contagem{ margin-left:auto; font-size:11.5px; font-weight:700; background:var(--paper-2); color:var(--ink-soft); padding:3px 10px; border-radius:var(--radius-pill); }
+.cp-item{
+  display:flex; align-items:center; gap:14px;
+  background:var(--paper-2); border-radius:10px;
+  padding:11px 15px; margin-bottom:8px;
+  cursor:pointer; transition:background .15s ease; border:none; width:100%; text-align:left;
+  font-family:'Inter', sans-serif;
+}
+.cp-item:hover{ background: color-mix(in srgb, var(--navy-2) 10%, var(--paper-2)); }
+.cp-item:last-child{ margin-bottom:0; }
+.cp-icone{ width:32px; height:32px; border-radius:9px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.cp-icone.pend{ background:var(--pend-bg); color:var(--pend); }
+.cp-icone.warn{ background:var(--ochre-tint); color:var(--ochre-dark); }
+.cp-icone svg{ width:16px; height:16px; }
+.cp-corpo{ flex:1; min-width:0; }
+.cp-nome{ font-size:13.5px; font-weight:600; color:var(--ink); }
+.cp-desc{ font-size:12px; color:var(--ink-soft); margin-top:1px; }
+.cp-acao{ flex-shrink:0; font-size:12px; font-weight:700; color:var(--navy-2); }
+.cp-vazio{ font-size:12.5px; color:var(--ink-soft); padding:8px 2px; }
+
 /* ---- tela de login ---- */
 #login-screen{
   display:none;
@@ -2351,6 +2383,11 @@ function abrirDetalheDoCadastro(id){
   abrirDetalheAluno(id);
 }
 
+function irParaAlunoDoPainel(id){
+  document.querySelector('.nav-btn[data-screen="consulta"]').click();
+  abrirDetalheAluno(id);
+}
+
 function iniciais(nome){
   const partes = nome.trim().split(/\s+/);
   const ini = (partes[0]?.[0] || '') + (partes.length > 1 ? partes[partes.length - 1][0] : '');
@@ -3142,12 +3179,83 @@ function renderPainel(){
 
   const rotuloStatus = { regular: 'Regular', pendente: 'Pendente', irregular: 'Irregular' };
 
+  const comprovantesAnalise = [];
+  const cnhVencendo = [];
+  const examesPendentes = [];
+  alunos.forEach(a => {
+    (a.taxas || []).forEach(t => {
+      if (t.status === 'em_analise') comprovantesAnalise.push({ aluno: a, taxa: t });
+    });
+    const dias = diasRestantes(a.cnhValidade);
+    if (dias !== null && dias >= 0 && dias <= 30) cnhVencendo.push({ aluno: a, dias });
+    (a.exames || []).forEach(ex => {
+      if (!ex.resultado) examesPendentes.push({ aluno: a, exame: ex });
+    });
+  });
+  cnhVencendo.sort((x, y) => x.dias - y.dias);
+
   container.innerHTML = `
-    <div class="painel-stats">
-      <div class="painel-stat"><div class="n">${total}</div><div class="l">Alunos cadastrados</div></div>
-      <div class="painel-stat ok"><div class="n">${pctCompletos}%</div><div class="l">Prontuários completos</div></div>
-      <div class="painel-stat pend"><div class="n">${porStatus.pendente}</div><div class="l">Com pendência</div></div>
-      <div class="painel-stat pend"><div class="n">R$ ${taxasAbertasValor.toFixed(2).replace('.', ',')}</div><div class="l">${taxasAbertasQtd} taxa(s) em aberto</div></div>
+    <div class="cp-tiras">
+      <div class="cp-tira pend"><div class="n">${examesPendentes.length}</div><div class="l">Exames pendentes</div></div>
+      <div class="cp-tira warn"><div class="n">${cnhVencendo.length}</div><div class="l">CNH vencendo</div></div>
+      <div class="cp-tira pend"><div class="n">${comprovantesAnalise.length}</div><div class="l">Comprovante p/ analisar</div></div>
+      <div class="cp-tira ok"><div class="n">${total - porStatus.pendente - porStatus.irregular}</div><div class="l">Prontuários em dia</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Central de pendências</h2>
+      <p class="card-note">Tudo que precisa de ação, reunido de todos os alunos — clique num item pra abrir o prontuário.</p>
+
+      <div class="cp-grupo">
+        <div class="cp-grupo-titulo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          Comprovantes aguardando análise
+          <span class="contagem">${comprovantesAnalise.length}</span>
+        </div>
+        ${comprovantesAnalise.length > 0 ? comprovantesAnalise.map(({ aluno: a, taxa: t }) => `
+          <button class="cp-item" onclick="irParaAlunoDoPainel('${a.id}')">
+            <div class="cp-icone pend"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
+            <div class="cp-corpo">
+              <div class="cp-nome">${escapeHtml(a.nome)}</div>
+              <div class="cp-desc">${escapeHtml(t.descricao)} — R$ ${Number(t.valor).toFixed(2).replace('.', ',')}</div>
+            </div>
+            <span class="cp-acao">Revisar →</span>
+          </button>`).join('') : '<div class="cp-vazio">Nenhum comprovante aguardando análise.</div>'}
+      </div>
+
+      <div class="cp-grupo">
+        <div class="cp-grupo-titulo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+          CNH vencendo nos próximos 30 dias
+          <span class="contagem">${cnhVencendo.length}</span>
+        </div>
+        ${cnhVencendo.length > 0 ? cnhVencendo.map(({ aluno: a, dias }) => `
+          <button class="cp-item" onclick="irParaAlunoDoPainel('${a.id}')">
+            <div class="cp-icone warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+            <div class="cp-corpo">
+              <div class="cp-nome">${escapeHtml(a.nome)}</div>
+              <div class="cp-desc">Vence em ${formatarDataBr(a.cnhValidade)} — ${dias === 0 ? 'vence hoje' : dias + ' dia(s) restantes'}</div>
+            </div>
+            <span class="cp-acao">Ver prontuário →</span>
+          </button>`).join('') : '<div class="cp-vazio">Nenhuma CNH vencendo nos próximos 30 dias.</div>'}
+      </div>
+
+      <div class="cp-grupo">
+        <div class="cp-grupo-titulo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Exames sem resultado registrado
+          <span class="contagem">${examesPendentes.length}</span>
+        </div>
+        ${examesPendentes.length > 0 ? examesPendentes.map(({ aluno: a, exame: ex }) => `
+          <button class="cp-item" onclick="irParaAlunoDoPainel('${a.id}')">
+            <div class="cp-icone pend"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg></div>
+            <div class="cp-corpo">
+              <div class="cp-nome">${escapeHtml(a.nome)}</div>
+              <div class="cp-desc">${escapeHtml(LABELS[ex.tipo] || ex.tipo)}</div>
+            </div>
+            <span class="cp-acao">Registrar →</span>
+          </button>`).join('') : '<div class="cp-vazio">Nenhum exame pendente de resultado.</div>'}
+      </div>
     </div>
 
     <div class="card">
