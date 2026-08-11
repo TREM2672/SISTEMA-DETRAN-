@@ -646,6 +646,37 @@ button.tiny:hover{ background: var(--ochre-tint); color:var(--ochre-dark); borde
 
 .card-perfil{ padding-bottom: 26px; }
 .card-perfil .dados-grid{ margin-bottom:0; box-shadow:none; }
+.hero-strip{
+  margin: -26px -28px 22px -28px;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, var(--navy-deep), var(--navy));
+  color: #fff;
+  font-family:'Sora', sans-serif; font-size:12px; font-weight:700; letter-spacing:.04em;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.hero-strip-brand{ display:flex; align-items:center; gap:9px; }
+.hero-strip-brand svg{ width:16px; height:16px; opacity:.9; }
+.hero-strip .detran-uf-badge{ background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.22); }
+.hero-strip .detran-uf-badge span{ color:#fff; }
+.hero-quickfacts{ display:flex; gap:26px; flex-wrap:wrap; margin: 12px 0 14px; }
+.hero-quickfacts div{ display:flex; flex-direction:column; gap:3px; }
+.hero-quickfacts span{ font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); font-weight:700; }
+.hero-quickfacts strong{ font-family:'JetBrains Mono',monospace; font-size:14.5px; font-weight:600; color:var(--ink); }
+.grid-duo{ display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:20px; }
+@media (max-width:700px){ .grid-duo{ grid-template-columns:1fr; } }
+.situacao-pill{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 13px; border-radius:var(--radius-pill);
+  font-size:11.5px; font-weight:700; letter-spacing:.02em; text-transform:uppercase;
+  background:var(--ok-bg); color:var(--ok); margin-bottom:6px;
+}
+.situacao-pill.pend{ background:var(--pend-bg); color:var(--pend); }
+.situacao-pill svg{ width:13px; height:13px; }
+.kv-row{ display:flex; justify-content:space-between; gap:14px; padding:10px 0; border-top:1px solid var(--line); font-size:13.5px; }
+.kv-row:first-child{ border-top:none; padding-top:0; }
+.kv-row span{ color:var(--ink-soft); flex-shrink:0; }
+.kv-row strong{ font-weight:600; text-align:right; }
 .dados-eyebrow{
   display:block;
   font-family:'Inter', sans-serif;
@@ -668,9 +699,11 @@ button.tiny:hover{ background: var(--ochre-tint); color:var(--ochre-dark); borde
 }
 
 .consulta-topbar{
-  margin: 0 0 18px; min-height: 1px;
+  position: fixed; top: 16px; right: 20px; z-index: 60;
+  min-height: 1px;
   display:flex; justify-content:flex-end;
 }
+#screen-consulta{ padding-top: 26px; }
 .selo-consultor{
   display:inline-flex; align-items:center; gap:14px;
   background: var(--surface); border: 1.5px solid var(--line);
@@ -891,6 +924,32 @@ tr:last-child td{ border-bottom:none;}
 .tag.ok{ background:var(--ok-bg); color:var(--ok); }
 .tag.pend{ background:var(--pend-bg); color:var(--pend); }
 .tag.pendente-amarelo{ background: var(--ochre-tint); color: var(--ochre-dark); }
+
+.check-list{ display:flex; flex-direction:column; }
+.check-item{
+  display:flex; align-items:center; gap:14px;
+  padding:13px 2px;
+  border-top:1px solid var(--line);
+}
+.check-item:first-child{ border-top:none; padding-top:2px; }
+.check-dot{
+  width:26px; height:26px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--ok-bg); color:var(--ok);
+}
+.check-dot.pend{ background:var(--pend-bg); color:var(--pend); }
+.check-dot svg{ width:15px; height:15px; }
+.check-body{ flex:1; min-width:0; }
+.check-title{ font-size:14.5px; font-weight:600; color:var(--ink); }
+.check-sub{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+.check-pill{
+  flex-shrink:0;
+  font-size:11px; font-weight:700; letter-spacing:.02em; text-transform:uppercase;
+  padding:6px 13px; border-radius: var(--radius-pill);
+  background:var(--ok-bg); color:var(--ok);
+}
+.check-pill.pend{ background:var(--pend-bg); color:var(--pend); }
+.check-exame-form{ padding: 0 2px 14px 40px; }
 
 .inline-form{ display:flex; gap:6px; align-items:center; flex-wrap:wrap;}
 .inline-form select, .inline-form input{ padding:6px 8px; font-size:12.5px;}
@@ -2275,6 +2334,17 @@ function formatarCpf(cpf){
   if (!cpf || cpf.length !== 11) return cpf;
   return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
 }
+function formatarDataBr(dataIso){
+  if (!dataIso) return '—';
+  const [ano, mes, dia] = dataIso.split('-');
+  return `${dia}/${mes}/${ano}`;
+}
+function diasRestantes(dataIso){
+  if (!dataIso) return null;
+  const alvo = new Date(dataIso + 'T00:00:00');
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  return Math.round((alvo - hoje) / 86400000);
+}
 function escapeHtml(s){
   return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
@@ -2347,8 +2417,11 @@ function renderDetalheAluno(){
     </div>` : ''}
 
     <div class="card card-perfil">
-      <div class="card-perfil-top">
-        <span class="dados-eyebrow">Dados do condutor</span>
+      <div class="hero-strip">
+        <div class="hero-strip-brand">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          PRONTUÁRIO DIGITAL · GESTÃO CFC
+        </div>
         ${aluno.naturalidadeUF ? `
         <div class="detran-uf-badge">
           <svg viewBox="0 0 40 40" fill="none">
@@ -2364,7 +2437,13 @@ function renderDetalheAluno(){
       <div class="detalhe-header">
         <div class="avatar-grande">${avatarGrande}</div>
         <div class="titulos">
-          <h1>${escapeHtml(aluno.nome)} ${statusBadgeMap[aluno.statusProntuario || 'pendente']}</h1>
+          <h1>${escapeHtml(aluno.nome)}</h1>
+          <div class="hero-quickfacts">
+            <div><span>CPF</span><strong>${escapeHtml(formatarCpf(aluno.cpf))}</strong></div>
+            <div><span>Categoria</span><strong>${escapeHtml(aluno.categoria)}</strong></div>
+            <div><span>Sexo</span><strong>${aluno.sexo ? escapeHtml(aluno.sexo) : '—'}</strong></div>
+          </div>
+          ${statusBadgeMap[aluno.statusProntuario || 'pendente']}
           <div class="foto-trocar">
             <input type="file" id="foto-trocar-input" accept="image/*">
             ${aluno.foto ? `<button class="btn-ajustar-foto" type="button" id="btn-ajustar-foto-existente">
@@ -2374,52 +2453,44 @@ function renderDetalheAluno(){
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="dados-grid">
-        <div class="dado-item">
-          <span class="dado-label">CPF</span>
-          <span class="dado-valor">${escapeHtml(formatarCpf(aluno.cpf))}</span>
-        </div>
-        <div class="dado-item">
-          <span class="dado-label">RG</span>
-          <span class="dado-valor">${escapeHtml(aluno.rg)}</span>
-        </div>
-        <div class="dado-item">
-          <span class="dado-label">Sexo</span>
-          <span class="dado-valor dado-valor-pequeno">${aluno.sexo ? escapeHtml(aluno.sexo) : '—'}</span>
-        </div>
-        <div class="dado-item">
-          <span class="dado-label">Categoria</span>
-          <span class="dado-valor">${escapeHtml(aluno.categoria)}</span>
-        </div>
-        <div class="dado-item">
-          <span class="dado-label">Nacionalidade</span>
-          <span class="dado-valor dado-valor-pequeno">${aluno.nacionalidade ? escapeHtml(aluno.nacionalidade) : '—'}</span>
-        </div>
-        <div class="dado-item">
-          <span class="dado-label">Naturalidade</span>
-          <span class="dado-valor dado-valor-pequeno">${aluno.naturalidade ? escapeHtml(aluno.naturalidade) : '—'}${aluno.naturalidadeUF ? ' / ' + escapeHtml(aluno.naturalidadeUF) : ''}</span>
-        </div>
-        <div class="dado-item">
-          <span class="dado-label">Tipo de processo</span>
-          <span class="dado-valor dado-valor-pequeno">${LABELS[aluno.tipoProcesso] ? escapeHtml(LABELS[aluno.tipoProcesso]) : '—'}</span>
-        </div>
-        <div class="dado-item">
-          <span class="dado-label">Nº de registro</span>
-          <span class="dado-valor dado-valor-pequeno">${aluno.numeroRegistro ? escapeHtml(aluno.numeroRegistro) : '—'}</span>
-        </div>
-        <div class="dado-item">
-          <span class="dado-label">RENACH</span>
-          <span class="dado-valor dado-valor-pequeno">${aluno.numeroRenach ? escapeHtml(aluno.numeroRenach) : '—'}</span>
-        </div>
-        <div class="dado-item dado-item-full dado-filiacao">
-          <div>
-            <span class="dado-label">Filiação — Mãe</span>
-            <span class="dado-valor dado-valor-pequeno">${aluno.nomeMae ? escapeHtml(aluno.nomeMae) : '—'}</span>
+    <div class="grid-duo">
+      <div class="card">
+        <h2>Identificação</h2>
+        <div class="kv-row"><span>RG</span><strong>${escapeHtml(aluno.rg)}</strong></div>
+        <div class="kv-row"><span>Nacionalidade</span><strong>${aluno.nacionalidade ? escapeHtml(aluno.nacionalidade) : '—'}</strong></div>
+        <div class="kv-row"><span>Naturalidade</span><strong>${aluno.naturalidade ? escapeHtml(aluno.naturalidade) : '—'}${aluno.naturalidadeUF ? ' / ' + escapeHtml(aluno.naturalidadeUF) : ''}</strong></div>
+        <div class="kv-row"><span>Filiação — Mãe</span><strong>${aluno.nomeMae ? escapeHtml(aluno.nomeMae) : '—'}</strong></div>
+        <div class="kv-row"><span>Filiação — Pai</span><strong>${aluno.nomePai ? escapeHtml(aluno.nomePai) : '—'}</strong></div>
+      </div>
+      <div class="card">
+        <h2>Dados da habilitação</h2>
+        <div class="kv-row"><span>Tipo de processo</span><strong>${LABELS[aluno.tipoProcesso] ? escapeHtml(LABELS[aluno.tipoProcesso]) : '—'}</strong></div>
+        <div class="kv-row"><span>Nº de registro</span><strong>${aluno.numeroRegistro ? escapeHtml(aluno.numeroRegistro) : '—'}</strong></div>
+        <div class="kv-row"><span>RENACH</span><strong>${aluno.numeroRenach ? escapeHtml(aluno.numeroRenach) : '—'}</strong></div>
+      </div>
+      <div class="card">
+        <h2>Situação &amp; vencimento</h2>
+        <span class="situacao-pill ${aluno.statusProntuario === 'irregular' ? 'pend' : ''}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+          ${aluno.statusProntuario === 'irregular' ? 'Irregular' : aluno.statusProntuario === 'pendente' ? 'Pendente' : 'Habilitação regular'}
+        </span>
+        <div class="kv-row"><span>Data de validade</span><strong>${formatarDataBr(aluno.cnhValidade)}</strong></div>
+        <div class="kv-row"><span>Tempo restante</span><strong>${(() => {
+          const dias = diasRestantes(aluno.cnhValidade);
+          if (dias === null) return '—';
+          if (dias < 0) return 'Vencida';
+          return dias + ' dia(s)';
+        })()}</strong></div>
+        <div style="display:flex; flex-direction:column; gap:12px; margin-top:14px;">
+          <div class="field">
+            <label for="cnh-pontuacao">Pontuação atual</label>
+            <input id="cnh-pontuacao" type="number" min="0" max="40" value="${aluno.pontuacaoCnh != null ? escapeHtml(String(aluno.pontuacaoCnh)) : ''}" placeholder="0" onchange="atualizarDadoCnh('pontuacaoCnh', this.value)">
           </div>
-          <div>
-            <span class="dado-label">Filiação — Pai</span>
-            <span class="dado-valor dado-valor-pequeno">${aluno.nomePai ? escapeHtml(aluno.nomePai) : '—'}</span>
+          <div class="field">
+            <label for="cnh-restricoes">Restrições médicas</label>
+            <input id="cnh-restricoes" type="text" value="${escapeHtml(aluno.restricoesMedicas || '')}" placeholder="nenhuma registrada" onchange="atualizarDadoCnh('restricoesMedicas', this.value)">
           </div>
         </div>
       </div>
@@ -2469,42 +2540,54 @@ function renderDetalheAluno(){
 
     <div class="card">
       <h2>Documentos ${v.docsOk ? '<span class="tag ok">OK</span>' : `<span class="tag pend">${v.docsFaltantes.length} pendente(s)</span>`}</h2>
-      <table>
-        <tr><th>Documento</th><th>Status</th><th></th></tr>
+      <div class="check-list">
         ${aluno.documentos.map(d => `
-          <tr>
-            <td>${escapeHtml(LABELS[d.tipo] || d.tipo)}</td>
-            <td>${d.apresentado ? '<span class="tag ok">Apresentado</span>' : '<span class="tag pend">Pendente</span>'}</td>
-            <td>${d.apresentado ? '' : `<button class="tiny" data-doc="${d.tipo}" onclick="marcarDocumento('${d.tipo}')">Marcar apresentado</button>`}</td>
-          </tr>`).join('')}
-      </table>
+          <div class="check-item">
+            <div class="check-dot ${d.apresentado ? '' : 'pend'}">${d.apresentado
+              ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'
+              : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>'}</div>
+            <div class="check-body">
+              <div class="check-title">${escapeHtml(LABELS[d.tipo] || d.tipo)}</div>
+            </div>
+            ${d.apresentado
+              ? '<span class="check-pill">Apresentado</span>'
+              : `<button class="tiny" data-doc="${d.tipo}" onclick="marcarDocumento('${d.tipo}')">Marcar apresentado</button>`}
+          </div>`).join('')}
+      </div>
     </div>
 
     <div class="card">
       <h2>Exames ${v.examesOk ? '<span class="tag ok">OK</span>' : `<span class="tag pend">${v.examesPendencias.length} pendência(s)</span>`}</h2>
-      <table>
-        <tr><th>Exame</th><th>Resultado</th><th>Nº do laudo</th><th>Registrar</th></tr>
+      <div class="check-list">
         ${aluno.exames.map(ex => {
           const opcoes = ['medico','psicotecnico'].includes(ex.tipo)
             ? [['apto','Apto'], ['inapto','Inapto']]
             : [['aprovado','Aprovado'], ['reprovado','Reprovado']];
+          const ok = ['apto','aprovado'].includes(ex.resultado);
           return `
-          <tr>
-            <td>${escapeHtml(LABELS[ex.tipo] || ex.tipo)}</td>
-            <td>${ex.resultado ? `<span class="tag ${['apto','aprovado'].includes(ex.resultado) ? 'ok' : 'pend'}">${escapeHtml(ex.resultado)}</span>` : '—'}</td>
-            <td>${ex.numeroLaudo ? escapeHtml(ex.numeroLaudo) : '—'}</td>
-            <td>
-              <div class="inline-form">
-                <select id="res-${ex.tipo}">
-                  ${opcoes.map(([valor, rotulo]) => `<option value="${valor}" ${ex.resultado === valor ? 'selected' : ''}>${rotulo}</option>`).join('')}
-                </select>
-                <input type="text" id="laudo-${ex.tipo}" placeholder="nº do laudo (opcional)" value="${escapeHtml(ex.numeroLaudo || '')}" style="width:120px;">
-                <button class="tiny" onclick="registrarExame('${ex.tipo}')">Salvar</button>
-              </div>
-            </td>
-          </tr>`;
+          <div class="check-item">
+            <div class="check-dot ${ex.resultado ? (ok ? '' : 'pend') : 'pend'}">${ex.resultado
+              ? (ok
+                ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'
+                : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>')
+              : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>'}</div>
+            <div class="check-body">
+              <div class="check-title">${escapeHtml(LABELS[ex.tipo] || ex.tipo)}</div>
+              <div class="check-sub">${ex.numeroLaudo ? 'Laudo nº ' + escapeHtml(ex.numeroLaudo) : 'Sem número de laudo registrado'}</div>
+            </div>
+            ${ex.resultado ? `<span class="check-pill ${ok ? '' : 'pend'}">${escapeHtml(ex.resultado)}</span>` : ''}
+          </div>
+          <div class="check-exame-form">
+            <div class="inline-form">
+              <select id="res-${ex.tipo}">
+                ${opcoes.map(([valor, rotulo]) => `<option value="${valor}" ${ex.resultado === valor ? 'selected' : ''}>${rotulo}</option>`).join('')}
+              </select>
+              <input type="text" id="laudo-${ex.tipo}" placeholder="nº do laudo (opcional)" value="${escapeHtml(ex.numeroLaudo || '')}" style="width:120px;">
+              <button class="tiny" onclick="registrarExame('${ex.tipo}')">Salvar</button>
+            </div>
+          </div>`;
         }).join('')}
-      </table>
+      </div>
     </div>
 
     <div class="card">
@@ -2513,6 +2596,18 @@ function renderDetalheAluno(){
           <h2>Aulas práticas ${v.praticaOk ? '<span class="tag ok">OK</span>' : '<span class="tag pend">Pendente</span>'}</h2>
         </div>
         ${!v.praticaOk ? `<button class="secondary" onclick="aprovarAulaPratica()">✓ Marcar como concluída</button>` : ''}
+      </div>
+      <div class="check-list">
+        <div class="check-item">
+          <div class="check-dot ${v.praticaOk ? '' : 'pend'}">${v.praticaOk
+            ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'
+            : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>'}</div>
+          <div class="check-body">
+            <div class="check-title">Aulas práticas de direção</div>
+            <div class="check-sub">${v.totalPratica} min registrados</div>
+          </div>
+          <span class="check-pill ${v.praticaOk ? '' : 'pend'}">${v.praticaOk ? 'Concluído' : 'Pendente'}</span>
+        </div>
       </div>
       <div class="progress-row"><span>${v.totalPratica} min registrados</span><span>mínimo: ${REGRAS.cargaPraticaMinimaMin} min</span></div>
       <div class="progress-bar"><div style="width:${Math.min(100, v.totalPratica / REGRAS.cargaPraticaMinimaMin * 100)}%"></div></div>
