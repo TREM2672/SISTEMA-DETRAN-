@@ -776,6 +776,11 @@ button.tiny:hover{ background: var(--ochre-tint); color:var(--ochre-dark); borde
 .status-btn.status-regular.ativo{ background: var(--ok); }
 .status-btn.status-pendente.ativo{ background: var(--ochre-dark); }
 .status-btn.status-irregular.ativo{ background: var(--pend); }
+.status-btn.status-todos{ color: var(--navy-2); }
+.status-btn.status-todos.ativo{ background: var(--navy-2); color:#fff; }
+.filtros-lista{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.filtros-lista .status-btn{ padding:7px 14px; font-size:12.5px; }
+.filtros-lista select{ padding:7px 12px; font-size:12.5px; border-radius: var(--radius-pill); }
 
 .dados-grid{
   display:grid;
@@ -1454,6 +1459,16 @@ tr:last-child td{ border-bottom:none;}
 
       <div class="search-row">
         <input id="filtro-lista-cadastrados" type="text" placeholder="Filtrar por nome ou CPF...">
+      </div>
+
+      <div class="filtros-lista">
+        <button class="status-btn status-todos ativo" type="button" data-situacao="todos"><span class="status-dot"></span> Todos</button>
+        <button class="status-btn status-regular" type="button" data-situacao="regular"><span class="status-dot"></span> Regular</button>
+        <button class="status-btn status-pendente" type="button" data-situacao="pendente"><span class="status-dot"></span> Pendente</button>
+        <button class="status-btn status-irregular" type="button" data-situacao="irregular"><span class="status-dot"></span> Irregular</button>
+        <select id="filtro-lista-categoria">
+          <option value="todas">Todas as categorias</option>
+        </select>
       </div>
 
       <div id="lista-todos-alunos" class="lista-alunos"></div>
@@ -2308,6 +2323,17 @@ function renderListaAlunos(){
 /* ============================================================
    TELA: PRONTUÁRIOS CADASTRADOS — lista completa, com exclusão
    ============================================================ */
+let filtroListaSituacao = 'todos';
+
+function atualizarOpcoesCategoriaLista(){
+  const select = document.getElementById('filtro-lista-categoria');
+  const atual = select.value;
+  const categorias = [...new Set(state.alunos.map(a => a.categoria).filter(Boolean))].sort();
+  select.innerHTML = '<option value="todas">Todas as categorias</option>' +
+    categorias.map(c => `<option value="${c}">Categoria ${c}</option>`).join('');
+  if (categorias.includes(atual)) select.value = atual;
+}
+
 function renderListaTodosAlunos(){
   const termoBruto = (document.getElementById('filtro-lista-cadastrados').value || '').trim();
   const termo = normalizarBusca(termoBruto);
@@ -2324,15 +2350,25 @@ function renderListaTodosAlunos(){
     return;
   }
 
-  const lista = termoBruto === ''
+  atualizarOpcoesCategoriaLista();
+  const categoriaFiltro = document.getElementById('filtro-lista-categoria').value;
+
+  let lista = termoBruto === ''
     ? state.alunos
     : state.alunos.filter(a =>
         normalizarBusca(a.nome).includes(termo) ||
         (termoCpf.length > 0 && a.cpf.includes(termoCpf))
       );
 
+  if (filtroListaSituacao !== 'todos'){
+    lista = lista.filter(a => (a.statusProntuario || 'pendente') === filtroListaSituacao);
+  }
+  if (categoriaFiltro !== 'todas'){
+    lista = lista.filter(a => a.categoria === categoriaFiltro);
+  }
+
   if (lista.length === 0){
-    container.innerHTML = `<div class="empty">Nenhum prontuário encontrado para "${termoBruto}".</div>`;
+    container.innerHTML = `<div class="empty">Nenhum prontuário encontrado com esses filtros.</div>`;
     return;
   }
 
@@ -2377,6 +2413,14 @@ function renderListaTodosAlunos(){
 }
 
 document.getElementById('filtro-lista-cadastrados').addEventListener('input', renderListaTodosAlunos);
+document.getElementById('filtro-lista-categoria').addEventListener('change', renderListaTodosAlunos);
+document.querySelectorAll('.filtros-lista .status-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    filtroListaSituacao = btn.dataset.situacao;
+    document.querySelectorAll('.filtros-lista .status-btn').forEach(b => b.classList.toggle('ativo', b === btn));
+    renderListaTodosAlunos();
+  });
+});
 
 function abrirDetalheDoCadastro(id){
   document.querySelector('.nav-btn[data-screen="consulta"]').click();
