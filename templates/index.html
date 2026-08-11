@@ -859,6 +859,11 @@ button.tiny.remover{ background: var(--pend-bg); color: var(--pend); font-weight
 .taxa-item:hover{ box-shadow: var(--shadow-md); transform: translateY(-1px); }
 .taxa-item.pendente{ border-color: color-mix(in srgb, var(--pend) 30%, var(--line)); }
 .taxa-item.paga{ border-color: color-mix(in srgb, var(--ok) 28%, var(--line)); background: var(--ok-bg); }
+.taxa-comprovante-link{
+  font-size:11.5px; font-weight:600; color: var(--navy-2);
+  text-decoration:none; margin-left:8px;
+}
+.taxa-comprovante-link:hover{ text-decoration:underline; }
 .taxa-icone{
   width:38px; height:38px; border-radius:11px; flex-shrink:0;
   display:flex; align-items:center; justify-content:center;
@@ -866,8 +871,9 @@ button.tiny.remover{ background: var(--pend-bg); color: var(--pend); font-weight
 .taxa-icone svg{ width:18px; height:18px; }
 .taxa-icone.pend{ background: var(--pend-bg); color: var(--pend); }
 .taxa-icone.ok{ background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
-.taxa-info{ flex:1; display:flex; align-items:center; gap:10px; min-width:0; }
-.taxa-descricao{ font-weight:600; font-size:14px; color:var(--ink); overflow-wrap:anywhere; }
+.taxa-info{ flex:1; display:flex; flex-direction:column; gap:5px; min-width:0; }
+.taxa-info-linha{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.taxa-descricao{ font-weight:700; font-size:15px; color:var(--ink); overflow-wrap:break-word; font-family:'Sora', sans-serif; }
 .taxa-valor{
   font-family:'JetBrains Mono', monospace; font-weight:700; font-size:17px;
   color:var(--ink); white-space:nowrap;
@@ -1442,6 +1448,26 @@ tr:last-child td{ border-bottom:none;}
     <div class="modal-actions">
       <button class="secondary" type="button" onclick="fecharEditorFoto()">Cancelar</button>
       <button class="primary" type="button" onclick="salvarFotoEditada()">Salvar foto</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="comprovante-overlay" style="display:none;">
+  <div class="modal-box">
+    <h3>Enviar comprovante de pagamento</h3>
+    <p class="card-note">Anexe o comprovante para dar início à regularização desta taxa. O status será atualizado para "Em análise" até a confirmação por um consultor.</p>
+    <div class="field" id="comprovante-taxa-campo" style="margin-bottom:14px;">
+      <label for="comprovante-taxa-select">Taxa</label>
+      <select id="comprovante-taxa-select"></select>
+    </div>
+    <div class="field">
+      <label for="comprovante-arquivo">Arquivo (imagem ou PDF)</label>
+      <input type="file" id="comprovante-arquivo" accept="image/*,.pdf">
+    </div>
+    <p class="form-erro" id="comprovante-erro"></p>
+    <div class="modal-actions">
+      <button class="secondary" type="button" onclick="fecharModalComprovante()">Cancelar</button>
+      <button class="primary" type="button" onclick="enviarComprovante()">Enviar comprovante</button>
     </div>
   </div>
 </div>
@@ -2395,6 +2421,7 @@ function renderDetalheAluno(){
 
   const taxasPendentes = (aluno.taxas || []).filter(t => t.status !== 'paga');
   const totalPendente = taxasPendentes.reduce((s, t) => s + Number(t.valor), 0);
+  const taxaParaRegularizar = taxasPendentes.find(t => t.status !== 'em_analise');
 
   const html = `
     <div class="resultado-consulta">
@@ -2410,9 +2437,10 @@ function renderDetalheAluno(){
       <div class="alerta-regularizacao-icone">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
       </div>
-      <div>
+      <div style="flex:1;">
         <strong>Taxa de Regularização pendente</strong>
         <span>${taxasPendentes.length === 1 ? 'Há 1 taxa em aberto' : `Há ${taxasPendentes.length} taxas em aberto`} — total de R$ ${totalPendente.toFixed(2).replace('.', ',')}. Oriente o aluno a regularizar o pagamento para manter o prontuário em dia.</span>
+        ${taxaParaRegularizar ? `<button class="tiny" style="margin-top:10px;" onclick="abrirModalComprovante('${taxaParaRegularizar.id}')">📎 Enviar comprovante de regularização</button>` : ''}
       </div>
     </div>` : ''}
 
@@ -2709,12 +2737,16 @@ function renderDetalheAluno(){
             </div>
             <div class="taxa-info">
               <span class="taxa-descricao">${escapeHtml(tx.descricao)}</span>
-              ${tx.status === 'paga' ? '<span class="tag ok">Paga</span>' : '<span class="tag pend">Pendente</span>'}
+              <div class="taxa-info-linha">
+                ${tx.status === 'paga' ? '<span class="tag ok">Paga</span>' : tx.status === 'em_analise' ? '<span class="tag pendente-amarelo">Em análise</span>' : '<span class="tag pend">Pendente</span>'}
+                ${tx.comprovante ? `<a href="${tx.comprovante}" download="${escapeHtml(tx.comprovanteNome || 'comprovante')}" class="taxa-comprovante-link">📎 Ver comprovante</a>` : ''}
+              </div>
             </div>
             <span class="taxa-valor">R$ ${Number(tx.valor).toFixed(2).replace('.', ',')}</span>
             <div class="taxa-acoes">
               ${tx.status !== 'paga'
-                ? `<button class="tiny tag-ok-btn" onclick="marcarTaxaPaga('${tx.id}')">✓ Marcar como paga</button>`
+                ? `<button class="tiny" onclick="abrirModalComprovante('${tx.id}')">📎 ${tx.comprovante ? 'Reenviar' : 'Enviar'} comprovante</button>
+                   <button class="tiny tag-ok-btn" onclick="marcarTaxaPaga('${tx.id}')">✓ Marcar como paga</button>`
                 : ''}
               <button class="tiny remover" onclick="removerTaxa('${tx.id}')" title="Remover taxa">✕</button>
             </div>
@@ -2972,6 +3004,61 @@ async function removerTaxa(taxaId){
   aluno.taxas = (aluno.taxas || []).filter(t => t.id !== taxaId);
   await salvarDados();
   mostrarToast('Taxa removida.');
+  renderDetalheAluno();
+}
+
+/* ============================================================
+   COMPROVANTE DE REGULARIZAÇÃO
+   ============================================================ */
+function abrirModalComprovante(taxaId){
+  const aluno = getAlunoAtual();
+  const pendentes = (aluno.taxas || []).filter(t => t.status !== 'paga');
+  const select = document.getElementById('comprovante-taxa-select');
+  const campo = document.getElementById('comprovante-taxa-campo');
+  select.innerHTML = pendentes.map(t =>
+    `<option value="${t.id}" ${t.id === taxaId ? 'selected' : ''}>${escapeHtml(t.descricao)} — R$ ${Number(t.valor).toFixed(2).replace('.', ',')}</option>`
+  ).join('');
+  campo.style.display = pendentes.length > 1 ? '' : 'none';
+  document.getElementById('comprovante-arquivo').value = '';
+  document.getElementById('comprovante-erro').textContent = '';
+  document.getElementById('comprovante-overlay').style.display = 'flex';
+}
+
+function fecharModalComprovante(){
+  document.getElementById('comprovante-overlay').style.display = 'none';
+}
+
+async function enviarComprovante(){
+  const taxaId = document.getElementById('comprovante-taxa-select').value;
+  const input = document.getElementById('comprovante-arquivo');
+  const erro = document.getElementById('comprovante-erro');
+  const arquivo = input.files[0];
+
+  if (!arquivo){
+    erro.textContent = 'Escolha um arquivo antes de enviar.';
+    return;
+  }
+  if (arquivo.size > 5 * 1024 * 1024){
+    erro.textContent = 'Arquivo muito grande (máx. 5MB).';
+    return;
+  }
+
+  const dataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(arquivo);
+  });
+
+  const aluno = getAlunoAtual();
+  const tx = (aluno.taxas || []).find(t => t.id === taxaId);
+  if (!tx) return;
+  tx.comprovante = dataUrl;
+  tx.comprovanteNome = arquivo.name;
+  tx.status = 'em_analise';
+  await salvarDados();
+  fecharModalComprovante();
+  mostrarToast('Comprovante enviado — taxa em análise.');
   renderDetalheAluno();
 }
 
